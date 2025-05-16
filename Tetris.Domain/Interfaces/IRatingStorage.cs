@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
-using BlockArena.Domain.Models;
+using BlockArena.Common.Models;
 
-namespace BlockArena.Domain.Interfaces
+namespace BlockArena.Common.Interfaces
 {
     public interface IRatingStorage
     {

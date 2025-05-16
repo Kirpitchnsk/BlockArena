@@ -1,25 +1,19 @@
-﻿using System;
+﻿using BlockArena.Common.Exceptions;
+using BlockArena.Common.Interfaces;
+using BlockArena.Common.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using BlockArena.Core.Exceptions;
-using BlockArena.Domain.Interfaces;
-using BlockArena.Domain.Models;
 
-namespace BlockArena.Domain.LeaderBoard
+namespace BlockArena.Common.Ratings
 {
-    public class RatingUpdater : IRatingUpdater
+    public class RatingUpdater(
+        IRatingStorage scoreBoardStorage,
+        Func<Task<Rating>> getLeaderBoard) : IRatingUpdater
     {
-        private Func<Task<Models.Rating>> getLeaderBoard;
-        private IRatingStorage scoreBoardStorage;
-
-        public RatingUpdater(
-            IRatingStorage scoreBoardStorage,
-            Func<Task<Models.Rating>> getLeaderBoard)
-        {
-            this.scoreBoardStorage = scoreBoardStorage;
-            this.getLeaderBoard = getLeaderBoard;
-        }
+        private readonly Func<Task<Rating>> getLeaderBoard = getLeaderBoard;
+        private readonly IRatingStorage scoreBoardStorage = scoreBoardStorage;
 
         public async Task Add(UserScore userScore)
         {
@@ -35,7 +29,7 @@ namespace BlockArena.Domain.LeaderBoard
                     trimmedUserScore.Username.ToLower() == currentUserScore.Username.ToLower()
                     && userScore.Score <= currentUserScore.Score);
 
-            if(firstRepeat != null)
+            if (firstRepeat != null)
                 throw new ValidationException($"{firstRepeat.Username} already has a score equal to or greater than {userScore.Score}.");
 
             await scoreBoardStorage.Add(trimmedUserScore);

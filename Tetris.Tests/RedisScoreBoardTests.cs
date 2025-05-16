@@ -4,9 +4,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
 using StackExchange.Redis;
-using BlockArena.Domain.Models;
 using Xunit;
-using BlockArena.Domain;
+using BlockArena.Common;
+using BlockArena.Common.Models;
 
 namespace BlockArena.Storage.Tests
 {
@@ -66,10 +66,10 @@ namespace BlockArena.Storage.Tests
             await Task.WhenAll(usernames
                 .Select(username => db.SortedSetRemoveAsync("user", username)));
 
-            await ConcurrentTask.WhenAll(Enumerable
+            await ParallelTask.WhenAll(Enumerable
                 .Range(start: 1, count: count)
                 .Select(i => (Func<Task>)(() => StoresTheScore(start: i * 10))),
-                maxConcurrency: 100);
+                max: 100);
         }
     }
 }

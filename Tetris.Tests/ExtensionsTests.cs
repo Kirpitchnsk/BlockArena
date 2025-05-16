@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using BlockArena.Domain;
+using BlockArena.Common;
 using FluentAssertions;
 using Xunit;
 

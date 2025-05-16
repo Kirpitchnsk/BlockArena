@@ -1,9 +1,10 @@
-﻿using System.Threading.Tasks;
+﻿using BlockArena.Common.Models;
+using System.Threading.Tasks;
 
-namespace BlockArena.Domain.Interfaces
+namespace BlockArena.Common.Interfaces
 {
     public interface IRatingHandler
     {
-        Task<Models.Rating> GetRating();
+        Task<Rating> GetRating();
     }
 }

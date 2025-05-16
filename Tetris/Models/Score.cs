@@ -1,8 +1,8 @@
 ﻿namespace BlockArena.Models
 {
-    public class UserScore
+    public class Score
     {
         public string Username { get; set; }
-        public int Score { get; set; }
+        public int Count { get; set; }
     }
 }

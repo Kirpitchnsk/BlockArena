@@ -1,4 +1,4 @@
-﻿namespace BlockArena.Domain.Models
+﻿namespace BlockArena.Common.Models
 {
     public record Player
     {

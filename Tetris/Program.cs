@@ -1,7 +1,4 @@
 using BlockArena.Database;
-using BlockArena.Domain.Interfaces;
-using BlockArena.Domain.LeaderBoard;
-using BlockArena.Domain.Models;
 using BlockArena.Hubs;
 using BlockArena.Interactors;
 using BlockArena.Interfaces;
@@ -14,12 +11,15 @@ using MongoDB.Driver;
 using StackExchange.Redis;
 using System.Threading.Tasks;
 using System;
-using Website.Middlewares;
 using Microsoft.Extensions.Hosting;
 using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.SignalR;
+using BlockArena.Common.Models;
+using BlockArena.Common.Ratings;
+using BlockArena.Common.Interfaces;
+using BlockArena.Middlewares;
 
 namespace BlockArena
 {
@@ -87,7 +87,7 @@ namespace BlockArena
 
             builder.Services.AddSingleton<InMemoryGameRoomStorage>();
             builder.Services.AddScoped<MongoGameRoomStorage>();
-            builder.Services.AddScoped<IGameRoomStorage>(sp =>
+            builder.Services.AddScoped<IRoomStorage>(sp =>
             {
                 var mongoClient = sp.GetService<IMongoClient>();
                 return mongoClient == null
@@ -106,7 +106,7 @@ namespace BlockArena
             app.UseMiddleware<IPLogger>();
             app.UseResponseCompression();
             app.UseRouting();
-            app.UseCustomExceptionHandler(env, app.Services.GetRequiredService<ILoggerFactory>());
+            app.UsePresonalExceptionHandler(env, app.Services.GetRequiredService<ILoggerFactory>());
 
             if (!string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("SentryDsn")))
             {

@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.Extensions.Logging;
 
-namespace Website.Middlewares
+namespace BlockArena.Middlewares
 {
     public class IPLogger(RequestDelegate next, ILoggerFactory loggerFactory)
     {
@@ -14,12 +14,14 @@ namespace Website.Middlewares
         public async Task Invoke(HttpContext ctx)
         {
             var forwardedIP = ctx.Request.Headers["X-Forwarded-For"].ToString();
+
             logger.LogInformation("{method} {url} from {ip}{forwardInfo}",
                 ctx.Request.Method,
-                UriHelper.GetEncodedUrl(ctx.Request),
+                ctx.Request.GetEncodedUrl(),
                 ctx.Connection.RemoteIpAddress,
                 string.IsNullOrWhiteSpace(forwardedIP) ? "" : $" (forwarded from: {forwardedIP})"
             );
+
             await next(ctx);
         }
     }

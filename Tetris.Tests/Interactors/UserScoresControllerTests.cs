@@ -2,11 +2,11 @@
 using NSubstitute;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using BlockArena.Domain.Interfaces;
-using BlockArena.Domain.Models;
 using BlockArena.Interactors;
 using BlockArena.Interfaces;
 using Xunit;
+using BlockArena.Common.Models;
+using BlockArena.Common.Interfaces;
 
 namespace BlockArena.Tests.Interactors
 {
@@ -39,11 +39,11 @@ namespace BlockArena.Tests.Interactors
 
             //Act
             //Assert
-            (await userScoresInteractor.GetUserScores(count: 3)).Should().BeEquivalentTo(new List<Models.UserScore>
+            (await userScoresInteractor.GetScores(count: 3)).Should().BeEquivalentTo(new List<Models.Score>
             {
-                new Models.UserScore { Username = "Stewie", Score = 102 },
-                new Models.UserScore { Username = "John", Score = 100 },
-                new Models.UserScore { Username = "Max", Score = 99 }
+                new Models.Score { Username = "Stewie", Count = 102 },
+                new Models.Score { Username = "John", Count = 100 },
+                new Models.Score { Username = "Max", Count = 99 }
             }, ops => ops.WithStrictOrdering());
         }
 
@@ -57,7 +57,7 @@ namespace BlockArena.Tests.Interactors
                 .Do(ci => receivedUserScore = ci.Arg<UserScore>());
 
             //Act
-            await userScoresInteractor.Add(new Models.UserScore { Username = "Stewie", Score = 200 });
+            await userScoresInteractor.Add(new Models.Score { Username = "Stewie", Count = 200 });
 
             //Assert
             receivedUserScore.Should().BeEquivalentTo(new UserScore

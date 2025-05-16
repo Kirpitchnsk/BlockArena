@@ -3,34 +3,34 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.JsonPatch;
-using BlockArena.Domain.Interfaces;
-using BlockArena.Domain.Models;
+using BlockArena.Common.Models;
+using BlockArena.Common.Interfaces;
 
 namespace BlockArena.Database
 {
-    public class InMemoryGameRoomStorage : IGameRoomStorage
+    public class InMemoryGameRoomStorage : IRoomStorage
     {
         private List<Room> roomStorage = new List<Room>();
 
-        public Task AddGameRoom(Room gameRoom)
+        public Task AddRoom(Room room)
         {
-            if (!roomStorage.Any(room => room.OrganizerId == gameRoom.OrganizerId))
+            if (!roomStorage.Any(room => room.OrganizerId == room.OrganizerId))
             {
-                roomStorage.Add(gameRoom);
+                roomStorage.Add(room);
             }
 
             return Task.FromResult(0);
         }
 
-        public Task TryUpdateGameRoom(JsonPatchDocument<Room> patch, string gameRoomCode)
+        public Task TryUpdateRoom(JsonPatchDocument<Room> patch, string roomCode)
         {
             try
             {
-                var theGameRoom = roomStorage.FirstOrDefault(room => room.OrganizerId == gameRoomCode);
+                var room = roomStorage.FirstOrDefault(x => x.OrganizerId == roomCode);
 
-                if (theGameRoom != null)
+                if (room != null)
                 {
-                    patch.ApplyTo(theGameRoom);
+                    patch.ApplyTo(room);
                 }
             }
             catch (Exception) 
@@ -41,7 +41,7 @@ namespace BlockArena.Database
             return Task.FromResult(0);
         }
 
-        public Task<Page<Room>> GetGameRooms(int start, int count)
+        public Task<Page<Room>> GetRooms(int start, int count)
         {
             var gameRooms = roomStorage.Skip(start).Take(count).ToList();
 
@@ -56,7 +56,7 @@ namespace BlockArena.Database
             });
         }
 
-        public Task RemoveGameRoom(Room room)
+        public Task RemoveRoom(Room room)
         {
             roomStorage = roomStorage.Where(x => x.OrganizerId != room.OrganizerId).ToList();
             return Task.FromResult(0);

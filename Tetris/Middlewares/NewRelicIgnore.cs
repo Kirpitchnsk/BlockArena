@@ -1,8 +1,8 @@
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using System;
+using System.Threading.Tasks;
 
-namespace Website.Middlewares
+namespace BlockArena.Middlewares
 {
     public class NewRelicIgnore(RequestDelegate next, string path)
     {
@@ -11,8 +11,7 @@ namespace Website.Middlewares
 
         public async Task Invoke(HttpContext ctx)
         {
-            if (ctx.Request.Path.Value.Equals(path, System.StringComparison.CurrentCultureIgnoreCase)
-                || ctx.Request.Path.Value.StartsWith($"{path}/"))
+            if (ctx.Request.Path.Value.Equals(path, StringComparison.CurrentCultureIgnoreCase) || ctx.Request.Path.Value.StartsWith($"{path}/"))
             {
                 NewRelic.Api.Agent.NewRelic.IgnoreTransaction();
                 NewRelic.Api.Agent.NewRelic.IgnoreApdex();

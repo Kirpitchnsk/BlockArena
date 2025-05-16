@@ -27,7 +27,6 @@ namespace BlockArena.Storage.Mongo.Creator
                 collection.Indexes.CreateOne(indexModel);
 
                 Console.WriteLine($"Index on 'timestamp' property created successfully in '{CollectionName}' collection.");
-                // mongodb+srv://admin:<password>@<host>/?retryWrites=true&w=majority
             }
             catch (Exception ex)
             {

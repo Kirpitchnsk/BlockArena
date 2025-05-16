@@ -1,9 +1,9 @@
 using System;
 
-namespace BlockArena.Core.Exceptions
+namespace BlockArena.Common.Exceptions
 {
-    public class DomainException : Exception
+    public class DomainException(string message) : Exception(message)
     {
-        public DomainException(string message) : base(message) { }
+
     }
 }

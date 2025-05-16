@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace BlockArena.Domain.Models
+namespace BlockArena.Common.Models
 {
     public class Page<T>
     {

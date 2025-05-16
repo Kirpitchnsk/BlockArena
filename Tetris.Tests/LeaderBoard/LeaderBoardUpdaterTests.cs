@@ -3,11 +3,11 @@ using NSubstitute;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using BlockArena.Core.Exceptions;
-using BlockArena.Domain.Interfaces;
 using BlockArena.Domain.LeaderBoard;
-using BlockArena.Domain.Models;
 using Xunit;
+using BlockArena.Common.Models;
+using BlockArena.Common.Interfaces;
+using BlockArena.Common.Exceptions;
 
 namespace BlockArena.Domain.Tests.LeaderBoard
 {
@@ -15,7 +15,7 @@ namespace BlockArena.Domain.Tests.LeaderBoard
     {
         readonly IRatingUpdater leaderBoardUpdater;
         readonly IRatingStorage scoreBoardStorage;
-        readonly Models.Rating leaderBoard;
+        readonly Rating leaderBoard;
 
         public LeaderBoardUpdaterTests()
         {

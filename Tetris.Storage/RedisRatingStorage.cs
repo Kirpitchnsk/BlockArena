@@ -1,7 +1,7 @@
 using System.Threading.Tasks;
 using StackExchange.Redis;
-using BlockArena.Domain.Interfaces;
-using BlockArena.Domain.Models;
+using BlockArena.Common.Models;
+using BlockArena.Common.Interfaces;
 
 namespace BlockArena.Database
 {

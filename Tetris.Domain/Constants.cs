@@ -1,4 +1,4 @@
-namespace BlockArena.Domain
+namespace BlockArena.Common
 {
     public static class Constants
     {

@@ -1,10 +1,10 @@
-﻿using System;
+﻿using BlockArena.Common.Interfaces;
+using BlockArena.Common.Models;
+using BlockArena.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using BlockArena.Domain.Interfaces;
-using BlockArena.Domain.Models;
-using BlockArena.Interfaces;
 
 namespace BlockArena.Interactors
 {
@@ -13,25 +13,25 @@ namespace BlockArena.Interactors
         private readonly Func<Task<Rating>> getRating = getRating;
         private readonly IRatingUpdater ratingUpdater = ratingUpdater;
 
-        public async Task Add(Models.UserScore userScore)
+        public async Task Add(Models.Score userScore)
         {
             await ratingUpdater.Add(new UserScore
             {
-                Score = userScore.Score,
+                Score = userScore.Count,
                 Username = userScore.Username
             });
         }
 
-        public async Task<List<Models.UserScore>> GetUserScores(int count)
+        public async Task<List<Models.Score>> GetScores(int count)
         {
             return (await getRating())
                 .UserScores
                 .OrderByDescending(userScore => userScore.Score)
                 .Take(count)
-                .Select(userScore => new Models.UserScore
+                .Select(userScore => new Models.Score
                 {
                     Username = userScore.Username,
-                    Score = userScore.Score
+                    Count = userScore.Score
                 })
                 .ToList();
         }

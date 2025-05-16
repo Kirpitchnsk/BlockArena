@@ -1,7 +1,7 @@
-﻿namespace BlockArena.Core.Exceptions
+﻿namespace BlockArena.Common.Exceptions
 {
-    public class ValidationException : DomainException
+    public class ValidationException(string message) : DomainException(message)
     {
-        public ValidationException(string message) : base(message) { }
+
     }
 }

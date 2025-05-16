@@ -1,8 +1,8 @@
+using BlockArena.Common.Interfaces;
+using BlockArena.Common.Models;
+using StackExchange.Redis;
 using System.Linq;
 using System.Threading.Tasks;
-using StackExchange.Redis;
-using BlockArena.Domain.Interfaces;
-using BlockArena.Domain.Models;
 
 namespace BlockArena.Database
 {

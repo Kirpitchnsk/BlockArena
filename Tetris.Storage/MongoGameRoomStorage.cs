@@ -2,18 +2,18 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.JsonPatch;
 using MongoDB.Driver;
-using BlockArena.Domain.Interfaces;
-using BlockArena.Domain.Models;
+using BlockArena.Common.Models;
+using BlockArena.Common.Interfaces;
 
 namespace BlockArena.Database
 {
-    public class MongoGameRoomStorage(IMongoClient client) : IGameRoomStorage
+    public class MongoGameRoomStorage(IMongoClient client) : IRoomStorage
     {
         private readonly IMongoCollection<Room> roomsCollection = client.GetDatabase(DbName).GetCollection<Room>(CollectionName);
         private const string DbName = "tetris";
         private const string CollectionName = "rooms";
 
-        public async Task AddGameRoom(Room room)
+        public async Task AddRoom(Room room)
         {
             room.Timestamp = DateTime.UtcNow;
 
@@ -23,7 +23,7 @@ namespace BlockArena.Database
             await roomsCollection.ReplaceOneAsync(filterRooms, room, replaceOptions);
         }
 
-        public async Task TryUpdateGameRoom(JsonPatchDocument<Room> jsonPatch, string roomCode)
+        public async Task TryUpdateRoom(JsonPatchDocument<Room> jsonPatch, string roomCode)
         {
             try
             {
@@ -38,13 +38,13 @@ namespace BlockArena.Database
             }
         }
 
-        public async Task RemoveGameRoom(Room room)
+        public async Task RemoveRoom(Room room)
         {
             var filter = Builders<Room>.Filter.Eq(x => x.OrganizerId, room.OrganizerId);
             await roomsCollection.DeleteOneAsync(filter);
         }
 
-        public async Task<Page<Room>> GetGameRooms(int start, int count)
+        public async Task<Page<Room>> GetRooms(int start, int count)
         {
             var countRooms = await roomsCollection.CountDocumentsAsync(Builders<Room>.Filter.Empty);
 

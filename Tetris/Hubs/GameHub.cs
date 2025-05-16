@@ -8,23 +8,23 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using NewRelic.Api.Agent;
 using Sentry;
-using BlockArena.Domain.Interfaces;
-using BlockArena.Domain.Models;
-using BlockArena.Domain;
+using BlockArena.Common;
+using BlockArena.Common.Models;
+using BlockArena.Common.Interfaces;
 
 namespace BlockArena.Hubs
 {
-    public class GameHub(ILogger<GameHub> logger, IGameRoomStorage gameRoomStorage) : Hub
+    public class GameHub(ILogger<GameHub> logger, IRoomStorage roomStorage) : Hub
     {
         private readonly ILogger<GameHub> logger = logger;
-        private readonly IGameRoomStorage gameRoomStorage = gameRoomStorage;
+        private readonly IRoomStorage roomStorage = roomStorage;
 
         [Transaction(Web = true)]
         public async Task Hello(GroupMessage helloMessage)
         {
-            string groupId = helloMessage.GroupId;
-            string userId = helloMessage.Message.GetProperty("userId").GetString();
-            bool isRunning = helloMessage.Message.GetProperty("isRunning").GetBoolean();
+            var groupId = helloMessage.GroupId;
+            var userId = helloMessage.Message.GetProperty("userId").GetString();
+            var isRunning = helloMessage.Message.GetProperty("isRunning").GetBoolean();
             helloMessage.Message.TryGetProperty("name", out var name);
             var isOrganizer = userId == groupId;
             Context.Items["userId"] = userId;
@@ -39,10 +39,10 @@ namespace BlockArena.Hubs
             if (isOrganizer)
             {
                 var reset = isRunning ? Task.FromResult(0) : Clients.Group(groupId).SendAsync("reset");
-                var addGameRoom = gameRoomStorage.AddGameRoom(new Room
+                var addRoom = roomStorage.AddRoom(new Room
                 {
                     OrganizerId = groupId,
-                    Status = GameRoomStatus.Waiting,
+                    Status = RoomStatus.Waiting,
                     Players = new Dictionary<string, UserScore>
                     {
                         { groupId, new UserScore { } }
@@ -50,7 +50,7 @@ namespace BlockArena.Hubs
                 });
 
                 await reset;
-                await addGameRoom;
+                await addRoom;
             }
             else
             {
@@ -71,7 +71,7 @@ namespace BlockArena.Hubs
                 .Group($"{playersListUpdateMessage.GroupId}-players")
                 .SendAsync("playersListUpdate", playersListUpdateMessage.Message);
 
-            var playersList = playersListUpdateMessage.Message.To<PlayersList>();
+            var playersList = playersListUpdateMessage.Message.ConvertTo<PlayersList>();
             var patch = new JsonPatchDocument<Room>();
 
             patch.Replace(room => room.Players, playersList
@@ -82,7 +82,7 @@ namespace BlockArena.Hubs
                     Username = player.Name
                 }));
 
-            var updateRoom = gameRoomStorage.TryUpdateGameRoom(patch, Context.Items["groupId"] as string);
+            var updateRoom = roomStorage.TryUpdateRoom(patch, Context.Items["groupId"] as string);
 
             await sendBroadcast;
             await updateRoom;
@@ -101,9 +101,9 @@ namespace BlockArena.Hubs
             Task doNameChange()
             {
                 var newName = statusMessage.Message.GetProperty("name").GetString();
-                if (newName.Length > Domain.Constants.MaxUsernameChars)
+                if (newName.Length > Common.Constants.MaxUsernameChars)
                 {
-                    throw new HubException($"Name must be {Domain.Constants.MaxUsernameChars} characters or less.");
+                    throw new HubException($"Name must be {Common.Constants.MaxUsernameChars} characters or less.");
                 }
 
                 Context.Items["name"] = newName;
@@ -112,7 +112,7 @@ namespace BlockArena.Hubs
                 patch.Replace(
                     room => room.Players[Context.Items["userId"] as string],
                     new UserScore { Username = newName });
-                return gameRoomStorage.TryUpdateGameRoom(patch, Context.Items["groupId"] as string);
+                return roomStorage.TryUpdateRoom(patch, Context.Items["groupId"] as string);
             }
 
             await Task.WhenAll(
@@ -129,8 +129,8 @@ namespace BlockArena.Hubs
             var doBroadcast = Clients.Group(statusMessage.GroupId).SendAsync("start");
 
             var patch = new JsonPatchDocument<Room>();
-            patch.Replace(room => room.Status, GameRoomStatus.Running);
-            var updateRoom = gameRoomStorage.TryUpdateGameRoom(patch, Context.Items["groupId"] as string);
+            patch.Replace(room => room.Status, RoomStatus.Running);
+            var updateRoom = roomStorage.TryUpdateRoom(patch, Context.Items["groupId"] as string);
 
             await doBroadcast;
             await updateRoom;
@@ -142,8 +142,8 @@ namespace BlockArena.Hubs
             var doingBroadcast = Clients.Group(resultsMessage.GroupId).SendAsync("results", resultsMessage.Message);
 
             var patch = new JsonPatchDocument<Room>();
-            patch.Replace(room => room.Status, GameRoomStatus.Waiting);
-            var updatingRoom = gameRoomStorage.TryUpdateGameRoom(patch, Context.Items["groupId"] as string);
+            patch.Replace(room => room.Status, RoomStatus.Waiting);
+            var updatingRoom = roomStorage.TryUpdateRoom(patch, Context.Items["groupId"] as string);
 
             await doingBroadcast;
             await updatingRoom;
@@ -188,14 +188,14 @@ namespace BlockArena.Hubs
                 });
                 var patch = new JsonPatchDocument<Room>();
                 patch.Remove(room => room.Players[userId]);
-                var updatingRoom = gameRoomStorage.TryUpdateGameRoom(patch, Context.Items["groupId"] as string);
+                var updatingRoom = roomStorage.TryUpdateRoom(patch, Context.Items["groupId"] as string);
 
                 await doingBroadcast;
                 await updatingRoom;
             }
             else
             {
-                await gameRoomStorage.RemoveGameRoom(new Room { OrganizerId = groupId });
+                await roomStorage.RemoveRoom(new Room { OrganizerId = groupId });
             }
 
             if (exception != null) logger.LogError(exception, "Disconnected");

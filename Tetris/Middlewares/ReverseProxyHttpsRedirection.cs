@@ -1,26 +1,25 @@
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using System.Threading.Tasks;
 
-namespace Website.Middlewares
+namespace BlockArena.Middlewares
 {
     public class ReverseProxyHttpsRedirect(RequestDelegate next)
     {
         private const string ForwardedProtoHeader = "X-Forwarded-Proto";
         private readonly RequestDelegate next = next;
 
-        public async Task Invoke(HttpContext ctx)
+        public async Task Invoke(HttpContext context)
         {
-            var forwardedProto = ctx.Request.Headers[ForwardedProtoHeader].ToString();
+            var forwardedProto = context.Request.Headers[ForwardedProtoHeader].ToString();
 
             if (forwardedProto == string.Empty || forwardedProto == "https")
             {
-                await next(ctx);
+                await next(context);
             }
             else if (forwardedProto != "https")
             {
-                var withHttps = $"https://{ctx.Request.Host}{ctx.Request.Path}{ctx.Request.QueryString}";
-                ctx.Response.Redirect(withHttps);
+                var withHttps = $"https://{context.Request.Host}{context.Request.Path}{context.Request.QueryString}";
+                context.Response.Redirect(withHttps);
             }
         }
     }
