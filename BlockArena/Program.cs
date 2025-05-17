@@ -67,9 +67,7 @@ namespace BlockArena
                 {
                     EndPoints = { { "redis-16210.c56.east-us.azure.redns.redis-cloud.com", 16210 } },
                     User = "default",
-                    Password = "3CNaFze2o8ZaPj5HaqViwLAFQ4KcOA0k",
-                    Ssl = true,
-                    AbortOnConnectFail = false
+                    Password = "3CNaFze2o8ZaPj5HaqViwLAFQ4KcOA0k"
                 };
 
                 return ConnectionMultiplexer.Connect(config);

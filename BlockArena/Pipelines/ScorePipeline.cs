@@ -13,25 +13,25 @@ namespace BlockArena.Interactors
         private readonly Func<Task<Rating>> getRating = getRating;
         private readonly IRatingUpdater ratingUpdater = ratingUpdater;
 
-        public async Task Add(Models.Score userScore)
+        public async Task Add(Models.UserScore userScore)
         {
             await ratingUpdater.Add(new UserScore
             {
-                Score = userScore.Count,
+                Score = userScore.Score,
                 Username = userScore.Username
             });
         }
 
-        public async Task<List<Models.Score>> GetScores(int count)
+        public async Task<List<Models.UserScore>> GetScores(int count)
         {
             return (await getRating())
                 .UserScores
                 .OrderByDescending(userScore => userScore.Score)
                 .Take(count)
-                .Select(userScore => new Models.Score
+                .Select(userScore => new Models.UserScore
                 {
                     Username = userScore.Username,
-                    Count = userScore.Score
+                    Score = userScore.Score
                 })
                 .ToList();
         }

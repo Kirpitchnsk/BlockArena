@@ -39,11 +39,11 @@ namespace BlockArena.Tests.Interactors
 
             //Act
             //Assert
-            (await userScoresInteractor.GetScores(count: 3)).Should().BeEquivalentTo(new List<Models.Score>
+            (await userScoresInteractor.GetScores(count: 3)).Should().BeEquivalentTo(new List<Models.UserScore>
             {
-                new Models.Score { Username = "Stewie", Count = 102 },
-                new Models.Score { Username = "John", Count = 100 },
-                new Models.Score { Username = "Max", Count = 99 }
+                new Models.UserScore { Username = "Stewie", Score = 102 },
+                new Models.UserScore { Username = "John", Score = 100 },
+                new Models.UserScore { Username = "Max", Score = 99 }
             }, ops => ops.WithStrictOrdering());
         }
 
@@ -57,7 +57,7 @@ namespace BlockArena.Tests.Interactors
                 .Do(ci => receivedUserScore = ci.Arg<UserScore>());
 
             //Act
-            await userScoresInteractor.Add(new Models.Score { Username = "Stewie", Count = 200 });
+            await userScoresInteractor.Add(new Models.UserScore { Username = "Stewie", Score = 200 });
 
             //Assert
             receivedUserScore.Should().BeEquivalentTo(new UserScore

@@ -6,7 +6,7 @@ namespace BlockArena.Interfaces
 {
     public interface IScorePipeline
     {
-        Task<List<Models.Score>> GetScores(int count);
-        Task Add(Score userScore);
+        Task<List<Models.UserScore>> GetScores(int count);
+        Task Add(UserScore userScore);
     }
 }

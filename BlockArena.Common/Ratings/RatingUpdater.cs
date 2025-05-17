@@ -8,9 +8,7 @@ using System.Threading.Tasks;
 
 namespace BlockArena.Common.Ratings
 {
-    public class RatingUpdater(
-        IRatingStorage scoreBoardStorage,
-        Func<Task<Rating>> getLeaderBoard) : IRatingUpdater
+    public class RatingUpdater(IRatingStorage scoreBoardStorage, Func<Task<Rating>> getLeaderBoard) : IRatingUpdater
     {
         private readonly Func<Task<Rating>> getLeaderBoard = getLeaderBoard;
         private readonly IRatingStorage scoreBoardStorage = scoreBoardStorage;
@@ -30,7 +28,9 @@ namespace BlockArena.Common.Ratings
                     && userScore.Score <= currentUserScore.Score);
 
             if (firstRepeat != null)
+            {
                 throw new ValidationException($"{firstRepeat.Username} already has a score equal to or greater than {userScore.Score}.");
+            }
 
             await scoreBoardStorage.Add(trimmedUserScore);
         }

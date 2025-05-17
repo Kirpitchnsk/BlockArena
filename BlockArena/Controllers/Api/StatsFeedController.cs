@@ -19,14 +19,14 @@ namespace BlockArena.Controllers.Api
 
         [Route("api/player-scores")]
         [HttpGet]
-        public async Task<IEnumerable<Score>> GetScores()
+        public async Task<IEnumerable<UserScore>> GetScores()
         {
             return await scoreInteractor.GetScores(20);
         }
 
         [Route("api/player-scores")]
         [HttpPost]
-        public async Task AddUserScore([FromBody] Score score)
+        public async Task AddUserScore([FromBody] UserScore score)
         {
             await scoreInteractor.Add(score);
         }
