@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <ProjectReference Include="..\Tetris.Domain\BlockArena.Common.csproj" />
+    <ProjectReference Include="..\BlockArena.Common\BlockArena.Common.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Tetris\BlockArena.csproj" />
+    <ProjectReference Include="..\BlockArena\BlockArena.csproj" />
   </ItemGroup>
 
 </Project>

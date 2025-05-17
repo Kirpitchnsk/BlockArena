@@ -47,4 +47,4 @@ FROM mcr.microsoft.com/dotnet/aspnet:9.0
     NEW_RELIC_APP_NAME=tetris
 
     EXPOSE 80
-    ENTRYPOINT ["dotnet", "Tetris.dll"]
+    ENTRYPOINT ["dotnet", "BlockArena.dll"]

@@ -3,15 +3,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.12.35521.163 d17.12
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlockArena", "Tetris\BlockArena.csproj", "{4319A310-F309-4437-8B0B-A82AA07DA6DF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlockArena", "BlockArena\BlockArena.csproj", "{4319A310-F309-4437-8B0B-A82AA07DA6DF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlockArena.Tests", "Tetris.Tests\BlockArena.Tests.csproj", "{31E82FCE-9B22-40E3-BE16-EDF64520119F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlockArena.Tests", "BlockArena.Tests\BlockArena.Tests.csproj", "{31E82FCE-9B22-40E3-BE16-EDF64520119F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlockArena.Common", "Tetris.Domain\BlockArena.Common.csproj", "{47E9D981-5F97-4C8D-814F-E0911A421B16}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlockArena.Common", "BlockArena.Common\BlockArena.Common.csproj", "{47E9D981-5F97-4C8D-814F-E0911A421B16}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlockArena.Database", "Tetris.Storage\BlockArena.Database.csproj", "{9D46BEBD-EB43-4247-8946-6CD219171D43}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlockArena.Database", "BlockArena.Database\BlockArena.Database.csproj", "{9D46BEBD-EB43-4247-8946-6CD219171D43}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlockArena.Storage.Mongo.Creator", "Tetris.Storage.Mongo.Creator\BlockArena.Storage.Mongo.Creator.csproj", "{965A2F00-F2D6-43BF-B458-23B5D4958942}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlockArena.Storage.Mongo.Creator", "BlockArena.Storage.Mongo.Creator\BlockArena.Storage.Mongo.Creator.csproj", "{965A2F00-F2D6-43BF-B458-23B5D4958942}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
