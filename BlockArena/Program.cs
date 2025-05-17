@@ -58,7 +58,7 @@ namespace BlockArena
 
             builder.Services.AddScoped<IRatingStorage, RedisRatingStorage>();
             builder.Services.AddScoped<IRatingHandler, RedisRatingProvider>();
-            builder.Services.AddScoped<IRatingUpdater, RatingUpdater>();
+            builder.Services.AddScoped<IRatingHandler, RatingUpdater>();
             builder.Services.AddScoped<Func<Task<Rating>>>(sp => sp.GetService<IRatingHandler>().GetRating);
             builder.Services.AddScoped<IScorePipeline, ScorePipeline>();
             builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
@@ -101,7 +101,7 @@ namespace BlockArena
 
             // 3. MIDDLEWARE
 
-            app.UseMiddleware<IPLogger>();
+            app.UseMiddleware<TheLogger>();
             app.UseResponseCompression();
             app.UseRouting();
             app.UsePresonalExceptionHandler(env, app.Services.GetRequiredService<ILoggerFactory>());
@@ -111,7 +111,7 @@ namespace BlockArena
                 app.UseSentryTracing();
             }
 
-            app.UseMiddleware<ReverseProxyHttpsRedirect>();
+            app.UseMiddleware<HttpsProxyRedirection>();
             app.UseMiddleware<NewRelicIgnore>("/gameHub");
 
             if (env.IsDevelopment())

@@ -13,7 +13,7 @@ namespace BlockArena.Domain.Tests.LeaderBoard
 {
     public class LeaderBoardUpdaterTests
     {
-        readonly IRatingUpdater leaderBoardUpdater;
+        readonly IRatingHandler leaderBoardUpdater;
         readonly IRatingStorage scoreBoardStorage;
         readonly Rating leaderBoard;
 

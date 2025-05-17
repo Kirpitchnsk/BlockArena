@@ -1,12 +1,11 @@
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.Extensions.Logging;
+using System.Threading.Tasks;
 
 namespace BlockArena.Middlewares
 {
-    public class IPLogger(RequestDelegate next, ILoggerFactory loggerFactory)
+    public class TheLogger(RequestDelegate next, ILoggerFactory loggerFactory)
     {
         private readonly RequestDelegate next = next;
         private readonly ILogger logger = loggerFactory.CreateLogger("IPLogger");

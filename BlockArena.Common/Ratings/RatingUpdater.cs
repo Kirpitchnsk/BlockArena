@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace BlockArena.Common.Ratings
 {
-    public class RatingUpdater(IRatingStorage scoreBoardStorage, Func<Task<Rating>> getLeaderBoard) : IRatingUpdater
+    public class RatingUpdater(IRatingStorage scoreBoardStorage, Func<Task<Rating>> getLeaderBoard) : IRatingHandler
     {
         private readonly Func<Task<Rating>> getLeaderBoard = getLeaderBoard;
         private readonly IRatingStorage scoreBoardStorage = scoreBoardStorage;

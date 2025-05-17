@@ -3,23 +3,23 @@ using System.Threading.Tasks;
 
 namespace BlockArena.Middlewares
 {
-    public class ReverseProxyHttpsRedirect(RequestDelegate next)
+    public class HttpsProxyRedirection(RequestDelegate next)
     {
         private const string ForwardedProtoHeader = "X-Forwarded-Proto";
         private readonly RequestDelegate next = next;
 
-        public async Task Invoke(HttpContext context)
+        public async Task Invoke(HttpContext ctx)
         {
-            var forwardedProto = context.Request.Headers[ForwardedProtoHeader].ToString();
+            var forwardedProto = ctx.Request.Headers[ForwardedProtoHeader].ToString();
 
             if (forwardedProto == string.Empty || forwardedProto == "https")
             {
-                await next(context);
+                await next(ctx);
             }
             else if (forwardedProto != "https")
             {
-                var withHttps = $"https://{context.Request.Host}{context.Request.Path}{context.Request.QueryString}";
-                context.Response.Redirect(withHttps);
+                var withHttps = $"https://{ctx.Request.Host}{ctx.Request.Path}{ctx.Request.QueryString}";
+                ctx.Response.Redirect(withHttps);
             }
         }
     }

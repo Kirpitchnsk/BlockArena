@@ -8,7 +8,7 @@ namespace BlockArena.Controllers.Api
 {
     public class StatsFeedController(IScorePipeline scoreInteractor) : Controller
     {
-        readonly IScorePipeline scoreInteractor = scoreInteractor;
+        private readonly IScorePipeline scoreInteractor = scoreInteractor;
 
         [Route("api/player-scores")]
         [HttpHead]
@@ -21,7 +21,7 @@ namespace BlockArena.Controllers.Api
         [HttpGet]
         public async Task<IEnumerable<UserScore>> GetScores()
         {
-            return await scoreInteractor.GetScores(20);
+            return await scoreInteractor.GetScores(5);
         }
 
         [Route("api/player-scores")]

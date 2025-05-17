@@ -13,13 +13,13 @@ namespace BlockArena.Tests.Interactors
     public class UserScoresControllerTests
     {
         private readonly IScorePipeline userScoresInteractor;
-        private readonly IRatingUpdater leaderBoardUpdater;
+        private readonly IRatingHandler leaderBoardUpdater;
         private readonly Rating rating;
 
         public UserScoresControllerTests()
         {
             rating = new Rating();
-            leaderBoardUpdater = Substitute.For<IRatingUpdater>();
+            leaderBoardUpdater = Substitute.For<IRatingHandler>();
             userScoresInteractor = new ScorePipeline(
                 leaderBoardUpdater,
                 getRating: () => Task.FromResult(rating));
