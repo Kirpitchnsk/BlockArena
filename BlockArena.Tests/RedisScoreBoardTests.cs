@@ -7,25 +7,26 @@ using StackExchange.Redis;
 using Xunit;
 using BlockArena.Common;
 using BlockArena.Common.Models;
+using BlockArena.Database;
 
-namespace BlockArena.Storage.Tests
+namespace BlockArena.Tests
 {
     public class RedisScoreBoardTests
     {
-        private Task<ConnectionMultiplexer> getRedis;
+        private readonly Task<ConnectionMultiplexer> redisConfig;
 
         public RedisScoreBoardTests()
         {
-            getRedis = ConnectionMultiplexer.ConnectAsync(
+            redisConfig = ConnectionMultiplexer.ConnectAsync(
                 TestConfigContainer.GetConfig()["RedisConnectionString"]
                 );
         }
 
-        [Theory(Skip = "I rarely have the DB running locally")]
+        [Theory]
         [InlineData(0)]
         public async Task StoresTheScore(int start)
         {
-            IDatabase db = (await getRedis).GetDatabase();
+            var db = (await redisConfig).GetDatabase();
 
             var userScores = new List<UserScore>{
                 new UserScore { Username = $"user {start}", Score = 10 },
@@ -34,8 +35,8 @@ namespace BlockArena.Storage.Tests
                 new UserScore { Username = $"user {start + 3}", Score = 5 },
                 new UserScore { Username = $"user {start + 4}", Score = 2 }
             };
-            var leaderBoardProvider = new RedisRatingProvider(getRedis) { MaxScores = 10000 };
-            var scoreBoard = new RedisRatingStorage(getRedis);
+            var leaderBoardProvider = new RedisRatingProvider(redisConfig) { MaxScores = 10000 };
+            var scoreBoard = new RedisRatingStorage(redisConfig);
 
             await Task.WhenAll(userScores
                 .Select(userScore => db.SortedSetRemoveAsync("user", userScore.Username)));
@@ -53,11 +54,11 @@ namespace BlockArena.Storage.Tests
                 .Select(userScore => db.SortedSetRemoveAsync("user", userScore.Username)));
         }
 
-        [Fact(Skip = "I rarely have the DB up and running")]
+        [Fact]
         public async Task LoadTest()
         {
             const int count = 5000;
-            var db = (await getRedis).GetDatabase();
+            var db = (await redisConfig).GetDatabase();
             var usernames = Enumerable
                 .Range(start: 0, count: count + 5)
                 .Select(i => $"user {i}")
@@ -66,7 +67,7 @@ namespace BlockArena.Storage.Tests
             await Task.WhenAll(usernames
                 .Select(username => db.SortedSetRemoveAsync("user", username)));
 
-            await ParallelTask.WhenAll(Enumerable
+            await TaskHelper.WhenAll(Enumerable
                 .Range(start: 1, count: count)
                 .Select(i => (Func<Task>)(() => StoresTheScore(start: i * 10))),
                 max: 100);

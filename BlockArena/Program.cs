@@ -58,7 +58,7 @@ namespace BlockArena
 
             builder.Services.AddScoped<IRatingStorage, RedisRatingStorage>();
             builder.Services.AddScoped<IRatingHandler, RedisRatingProvider>();
-            builder.Services.AddScoped<IRatingHandler, RatingUpdater>();
+            builder.Services.AddScoped<IRatingUpdater, RatingUpdater>();
             builder.Services.AddScoped<Func<Task<Rating>>>(sp => sp.GetService<IRatingHandler>().GetRating);
             builder.Services.AddScoped<IScorePipeline, ScorePipeline>();
             builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
@@ -67,7 +67,7 @@ namespace BlockArena
                 {
                     EndPoints = { { "redis-16210.c56.east-us.azure.redns.redis-cloud.com", 16210 } },
                     User = "default",
-                    Password = "3CNaFze2o8ZaPj5HaqViwLAFQ4KcOA0k"
+                    Password = configuration["RedisSecretKey"]
                 };
 
                 return ConnectionMultiplexer.Connect(config);
@@ -84,13 +84,13 @@ namespace BlockArena
             BsonSerializer.RegisterSerializer(objectSerializer);
 
             builder.Services.AddSingleton<InMemoryGameRoomStorage>();
-            builder.Services.AddScoped<MongoGameRoomStorage>();
+            builder.Services.AddScoped<MongoRoomStorage>();
             builder.Services.AddScoped<IRoomStorage>(sp =>
             {
                 var mongoClient = sp.GetService<IMongoClient>();
                 return mongoClient == null
                     ? sp.GetService<InMemoryGameRoomStorage>()
-                    : sp.GetService<MongoGameRoomStorage>();
+                    : sp.GetService<MongoRoomStorage>();
             });
 
             builder.Services.AddSingleton<ExceptionHubFilter>();
@@ -101,7 +101,7 @@ namespace BlockArena
 
             // 3. MIDDLEWARE
 
-            app.UseMiddleware<TheLogger>();
+            app.UseMiddleware<TheIpLogger>();
             app.UseResponseCompression();
             app.UseRouting();
             app.UsePresonalExceptionHandler(env, app.Services.GetRequiredService<ILoggerFactory>());
@@ -112,7 +112,7 @@ namespace BlockArena
             }
 
             app.UseMiddleware<HttpsProxyRedirection>();
-            app.UseMiddleware<NewRelicIgnore>("/gameHub");
+            app.UseMiddleware<RelicIgnoreCreation>("/gameHub");
 
             if (env.IsDevelopment())
             {

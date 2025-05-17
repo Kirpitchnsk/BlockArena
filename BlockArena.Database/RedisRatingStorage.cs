@@ -5,9 +5,9 @@ using BlockArena.Common.Interfaces;
 
 namespace BlockArena.Database
 {
-    public class RedisRatingStorage(IConnectionMultiplexer redis) : IRatingStorage
+    public class RedisRatingStorage(IConnectionMultiplexer redisClient) : IRatingStorage
     {
-        private readonly IDatabase db = redis.GetDatabase();
+        private readonly IDatabase db = redisClient.GetDatabase();
 
         public async Task Add(UserScore userScore)
         {

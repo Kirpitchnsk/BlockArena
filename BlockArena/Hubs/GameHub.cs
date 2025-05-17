@@ -11,6 +11,8 @@ using Sentry;
 using BlockArena.Common;
 using BlockArena.Common.Models;
 using BlockArena.Common.Interfaces;
+using System.Net.WebSockets;
+using ZstdSharp.Unsafe;
 
 namespace BlockArena.Hubs
 {
@@ -27,6 +29,7 @@ namespace BlockArena.Hubs
             var isRunning = helloMessage.Message.GetProperty("isRunning").GetBoolean();
             helloMessage.Message.TryGetProperty("name", out var name);
             var isOrganizer = userId == groupId;
+
             Context.Items["userId"] = userId;
             Context.Items["groupId"] = groupId;
             Context.Items["name"] = name;
@@ -39,6 +42,7 @@ namespace BlockArena.Hubs
             if (isOrganizer)
             {
                 var reset = isRunning ? Task.FromResult(0) : Clients.Group(groupId).SendAsync("reset");
+
                 var addRoom = roomStorage.AddRoom(new Room
                 {
                     OrganizerId = groupId,
@@ -72,17 +76,17 @@ namespace BlockArena.Hubs
                 .SendAsync("playersListUpdate", playersListUpdateMessage.Message);
 
             var playersList = playersListUpdateMessage.Message.ConvertTo<PlayersList>();
-            var patch = new JsonPatchDocument<Room>();
+            var jsonPatch = new JsonPatchDocument<Room>();
 
-            patch.Replace(room => room.Players, playersList
+            jsonPatch.Replace(x => x.Players, playersList
                 .Players
                 .Where(player => !player.Disconnected)
-                .ToDictionary(player => player.UserId, player => new UserScore
+                .ToDictionary(x => x.UserId, player => new UserScore
                 {
                     Username = player.Name
                 }));
 
-            var updateRoom = roomStorage.TryUpdateRoom(patch, Context.Items["groupId"] as string);
+            var updateRoom = roomStorage.TryUpdateRoom(jsonPatch, Context.Items["groupId"] as string);
 
             await sendBroadcast;
             await updateRoom;
@@ -91,35 +95,44 @@ namespace BlockArena.Hubs
         [Transaction(Web = true)]
         public async Task Status(GroupMessage statusMessage)
         {
-            var messageInludesName = statusMessage
+            var messageHasName = statusMessage
                 .Message
                 .EnumerateObject()
                 .Any(prop => prop.Name == "name" && prop.Value.ValueKind == JsonValueKind.String);
-            var nameHasChanged = Context.Items["name"] as string != GetNameFrom(statusMessage);
-            var isNameChange = messageInludesName && nameHasChanged;
+
+            var nameIsChanging = Context.Items["name"] as string != GetNameFrom(statusMessage);
+            var isNameChange = messageHasName && nameIsChanging;
 
             Task doNameChange()
             {
                 var newName = statusMessage.Message.GetProperty("name").GetString();
+
                 if (newName.Length > Common.Constants.MaxUsernameChars)
                 {
-                    throw new HubException($"Name must be {Common.Constants.MaxUsernameChars} characters or less.");
+                    throw new HubException($"Имя должно быть из {Common.Constants.MaxUsernameChars} символов или меньше.");
                 }
 
                 Context.Items["name"] = newName;
 
-                var patch = new JsonPatchDocument<Room>();
-                patch.Replace(
-                    room => room.Players[Context.Items["userId"] as string],
+                var jsonPatch = new JsonPatchDocument<Room>();
+
+                jsonPatch.Replace(
+                    x => x.Players[Context.Items["userId"] as string],
                     new UserScore { Username = newName });
-                return roomStorage.TryUpdateRoom(patch, Context.Items["groupId"] as string);
+
+                return roomStorage.TryUpdateRoom(jsonPatch, Context.Items["groupId"] as string);
+            }
+
+            Task updateDataWhenNameChange()
+            {
+                return (isNameChange
+                    ? Clients.Group(statusMessage.GroupId)
+                    : Clients.OthersInGroup(statusMessage.GroupId)).SendAsync("status", statusMessage.Message);
             }
 
             await Task.WhenAll(
                 isNameChange ? doNameChange() : Task.FromResult(0),
-                (isNameChange
-                    ? Clients.Group(statusMessage.GroupId)
-                    : Clients.OthersInGroup(statusMessage.GroupId)).SendAsync("status", statusMessage.Message)
+                updateDataWhenNameChange()  
             );
         }
 
@@ -130,6 +143,7 @@ namespace BlockArena.Hubs
 
             var patch = new JsonPatchDocument<Room>();
             patch.Replace(room => room.Status, RoomStatus.Running);
+
             var updateRoom = roomStorage.TryUpdateRoom(patch, Context.Items["groupId"] as string);
 
             await doBroadcast;
@@ -139,14 +153,15 @@ namespace BlockArena.Hubs
         [Transaction(Web = true)]
         public async Task Results(GroupMessage resultsMessage)
         {
-            var doingBroadcast = Clients.Group(resultsMessage.GroupId).SendAsync("results", resultsMessage.Message);
+            var doBroadcast = Clients.Group(resultsMessage.GroupId).SendAsync("results", resultsMessage.Message);
 
-            var patch = new JsonPatchDocument<Room>();
-            patch.Replace(room => room.Status, RoomStatus.Waiting);
-            var updatingRoom = roomStorage.TryUpdateRoom(patch, Context.Items["groupId"] as string);
+            var jsonPatch = new JsonPatchDocument<Room>();
+            jsonPatch.Replace(x => x.Status, RoomStatus.Waiting);
 
-            await doingBroadcast;
-            await updatingRoom;
+            var updateRoom = roomStorage.TryUpdateRoom(jsonPatch, Context.Items["groupId"] as string);
+
+            await doBroadcast;
+            await updateRoom;
         }
 
         [Transaction(Web = true)]
@@ -174,20 +189,24 @@ namespace BlockArena.Hubs
             var userId = Context.Items["userId"] as string;
             var isOrganizer = groupId == userId;
 
-            await (isOrganizer
+            var disconnect = isOrganizer
                 ? Clients.Group(groupId).SendAsync("noOrganizer")
-                : Clients.Group(groupId).SendAsync("status", new { userId, disconnected = true }));
+                : Clients.Group(groupId).SendAsync("status", new { userId, disconnected = true });
+
+            await disconnect;
 
             if (!isOrganizer)
             {
-                string name = Context.Items["name"].ToString();
+                var name = Context.Items["name"].ToString();
+
                 var doingBroadcast = Clients.Group(groupId).SendAsync("addToChat", new
                 {
                     notification = "disconnected",
                     userId
                 });
+
                 var patch = new JsonPatchDocument<Room>();
-                patch.Remove(room => room.Players[userId]);
+                patch.Remove(x => x.Players[userId]);
                 var updatingRoom = roomStorage.TryUpdateRoom(patch, Context.Items["groupId"] as string);
 
                 await doingBroadcast;
@@ -198,10 +217,11 @@ namespace BlockArena.Hubs
                 await roomStorage.RemoveRoom(new Room { OrganizerId = groupId });
             }
 
-            if (exception != null) logger.LogError(exception, "Disconnected");
+            if (exception != null)
+            {
+                logger.LogError(exception, "Disconnected");
+            }
         }
-
-        #region Helpers
 
         public string GetNameFrom(GroupMessage groupMessage)
         {
@@ -211,7 +231,5 @@ namespace BlockArena.Hubs
 
             return hasKey ? name.GetString() : null;
         }
-
-        #endregion
     }
 }

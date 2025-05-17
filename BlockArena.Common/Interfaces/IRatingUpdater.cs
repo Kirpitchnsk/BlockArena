@@ -3,8 +3,8 @@ using BlockArena.Common.Models;
 
 namespace BlockArena.Common.Interfaces
 {
-    public interface IRatingHandler
+    public interface IRatingUpdater
     {
-        Task Add(UserScore userScore);
+        public Task Add(UserScore userScore);
     }
 }

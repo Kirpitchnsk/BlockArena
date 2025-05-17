@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace BlockArena.Common
 {
-    public class ParallelTask
+    public class TaskHelper
     {
         public static async Task WhenAll(IEnumerable<Func<Task>> tasks, int max)
         {
@@ -15,8 +15,6 @@ namespace BlockArena.Common
                 .Range(1, max)
                 .Select(i => RunInSeries(taskEnumerator)));
         }
-
-        #region Helpers
 
         private static async Task RunInSeries(IEnumerator<Func<Task>> enumerator)
         {
@@ -37,7 +35,5 @@ namespace BlockArena.Common
                     .ToList())
                 : accumalatedValuesOrEmpty;
         }
-
-        #endregion
     }
 }

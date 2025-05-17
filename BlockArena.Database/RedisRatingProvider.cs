@@ -6,13 +6,13 @@ using System.Threading.Tasks;
 
 namespace BlockArena.Database
 {
-    public class RedisRatingProvider(IConnectionMultiplexer redis) : IRatingHandler
+    public class RedisRatingProvider(IConnectionMultiplexer redisClient) : IRatingHandler
     {
         public int MaxScores { get; set; } = 20;
 
         public async Task<Rating> GetRating()
         {
-            var db = redis.GetDatabase();
+            var db = redisClient.GetDatabase();
             var entries = await db.SortedSetRangeByRankWithScoresAsync("user", 0, MaxScores - 1, Order.Descending);
 
             return new Rating

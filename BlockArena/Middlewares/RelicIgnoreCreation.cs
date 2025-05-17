@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace BlockArena.Middlewares
 {
-    public class NewRelicIgnore(RequestDelegate next, string path)
+    public class RelicIgnoreCreation(RequestDelegate next, string path)
     {
         private readonly RequestDelegate next = next;
         private readonly string path = path;

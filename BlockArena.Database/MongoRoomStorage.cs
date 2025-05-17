@@ -7,7 +7,7 @@ using BlockArena.Common.Interfaces;
 
 namespace BlockArena.Database
 {
-    public class MongoGameRoomStorage(IMongoClient client) : IRoomStorage
+    public class MongoRoomStorage(IMongoClient client) : IRoomStorage
     {
         private readonly IMongoCollection<Room> roomsCollection = client.GetDatabase(DbName).GetCollection<Room>(CollectionName);
         private const string DbName = "tetris";
@@ -18,7 +18,10 @@ namespace BlockArena.Database
             room.Timestamp = DateTime.UtcNow;
 
             var filterRooms = Builders<Room>.Filter.Eq(x => x.OrganizerId, room.OrganizerId);
-            var replaceOptions = new ReplaceOptions { IsUpsert = true };
+            var replaceOptions = new ReplaceOptions 
+            { 
+                IsUpsert = true 
+            };
 
             await roomsCollection.ReplaceOneAsync(filterRooms, room, replaceOptions);
         }
@@ -34,7 +37,7 @@ namespace BlockArena.Database
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+
             }
         }
 
@@ -50,7 +53,7 @@ namespace BlockArena.Database
 
             if (start + count > countRooms)
             {
-                long totalPages = (long)Math.Ceiling(countRooms / (double)count) - 1;
+                var totalPages = (long)Math.Ceiling(countRooms / (double)count) - 1;
                 start = Math.Max((int)(totalPages * count), 0);
             }
 

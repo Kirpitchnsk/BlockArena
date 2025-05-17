@@ -12,16 +12,16 @@ namespace BlockArena.Tests.Interactors
 {
     public class UserScoresControllerTests
     {
-        private readonly IScorePipeline userScoresInteractor;
-        private readonly IRatingHandler leaderBoardUpdater;
+        private readonly IScorePipeline scorePipeline;
+        private readonly IRatingUpdater ratingUpdater;
         private readonly Rating rating;
 
         public UserScoresControllerTests()
         {
             rating = new Rating();
-            leaderBoardUpdater = Substitute.For<IRatingHandler>();
-            userScoresInteractor = new ScorePipeline(
-                leaderBoardUpdater,
+            ratingUpdater = Substitute.For<IRatingUpdater>();
+            scorePipeline = new ScorePipeline(
+                ratingUpdater,
                 getRating: () => Task.FromResult(rating));
         }
 
@@ -39,7 +39,7 @@ namespace BlockArena.Tests.Interactors
 
             //Act
             //Assert
-            (await userScoresInteractor.GetScores(count: 3)).Should().BeEquivalentTo(new List<Models.UserScore>
+            (await scorePipeline.GetScores(count: 3)).Should().BeEquivalentTo(new List<Models.UserScore>
             {
                 new Models.UserScore { Username = "Stewie", Score = 102 },
                 new Models.UserScore { Username = "John", Score = 100 },
@@ -52,12 +52,12 @@ namespace BlockArena.Tests.Interactors
         {
             //Arrange
             UserScore receivedUserScore = null;
-            leaderBoardUpdater
+            ratingUpdater
                 .When(updater => updater.Add(Arg.Any<UserScore>()))
                 .Do(ci => receivedUserScore = ci.Arg<UserScore>());
 
             //Act
-            await userScoresInteractor.Add(new Models.UserScore { Username = "Stewie", Score = 200 });
+            await scorePipeline.Add(new Models.UserScore { Username = "Stewie", Score = 200 });
 
             //Assert
             receivedUserScore.Should().BeEquivalentTo(new UserScore

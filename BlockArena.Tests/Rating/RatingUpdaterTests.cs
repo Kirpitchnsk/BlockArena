@@ -1,29 +1,29 @@
-﻿using FluentAssertions;
+﻿using BlockArena.Common.Exceptions;
+using BlockArena.Common.Interfaces;
+using BlockArena.Common.Models;
+using BlockArena.Common.Ratings;
+using FluentAssertions;
 using NSubstitute;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using BlockArena.Domain.LeaderBoard;
 using Xunit;
-using BlockArena.Common.Models;
-using BlockArena.Common.Interfaces;
-using BlockArena.Common.Exceptions;
 
-namespace BlockArena.Domain.Tests.LeaderBoard
+namespace BlockArena.Tests.LeaderBoard
 {
-    public class LeaderBoardUpdaterTests
+    public class RatingUpdaterTests
     {
-        readonly IRatingHandler leaderBoardUpdater;
-        readonly IRatingStorage scoreBoardStorage;
-        readonly Rating leaderBoard;
+        private readonly IRatingUpdater ratingUpdater;
+        private readonly IRatingStorage scoreBoardStorage;
+        private readonly Rating rating;
 
-        public LeaderBoardUpdaterTests()
+        public RatingUpdaterTests()
         {
-            leaderBoard = new Models.Rating();
+            rating = new Models.Rating();
             scoreBoardStorage = Substitute.For<IRatingStorage>();
-            leaderBoardUpdater = new RatingUpdater(
+            ratingUpdater = new RatingUpdater(
                 scoreBoardStorage,
-                getLeaderBoard: () => Task.FromResult(leaderBoard));
+                () => Task.FromResult(rating));
         }
 
         [Fact]
@@ -37,7 +37,7 @@ namespace BlockArena.Domain.Tests.LeaderBoard
                 .Do(ci => receivedUserScore = ci.Arg<UserScore>());
 
             //Act
-            await leaderBoardUpdater.Add(userScore);
+            await ratingUpdater.Add(userScore);
 
             //Assert
             receivedUserScore.Should().BeEquivalentTo(new UserScore { Score = 10, Username = "Stewie" });
@@ -47,11 +47,11 @@ namespace BlockArena.Domain.Tests.LeaderBoard
         public async Task DoesNotAddScoreForUserThatExistsWithSameOrHigherScore()
         {
             //Arrange
-            leaderBoard.UserScores = new List<UserScore> { new UserScore { Score = 10, Username = "stewie" } };
+            rating.UserScores = new List<UserScore> { new UserScore { Score = 10, Username = "stewie" } };
 
             //Act
             //Assert
-            (await ((Func<Task>)(async () => await leaderBoardUpdater.Add(new UserScore { Score = 10, Username = "Stewie" })))
+            (await ((Func<Task>)(async () => await ratingUpdater.Add(new UserScore { Score = 10, Username = "Stewie" })))
                 .Should()
                 .ThrowAsync<ValidationException>())
                 .WithMessage("Stewie already has a score equal to or greater than 10.");
@@ -63,11 +63,11 @@ namespace BlockArena.Domain.Tests.LeaderBoard
         public async Task DoesNotAddScoreForUsernamesThatAreTooLong()
         {
             //Arrange
-            leaderBoard.UserScores = new List<UserScore> { new UserScore { Score = 10, Username = "stewie" } };
+            rating.UserScores = new List<UserScore> { new UserScore { Score = 10, Username = "stewie" } };
 
             //Act
             //Assert
-            (await ((Func<Task>)(async () => await leaderBoardUpdater.Add(new UserScore { Score = 10, Username = "some really really long user name here" })))
+            (await ((Func<Task>)(async () => await ratingUpdater.Add(new UserScore { Score = 10, Username = "some really really long user name here" })))
                 .Should()
                 .ThrowAsync<ValidationException>())
                 .WithMessage("Username length must not be over 20.");

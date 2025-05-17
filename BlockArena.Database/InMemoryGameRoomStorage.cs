@@ -22,7 +22,7 @@ namespace BlockArena.Database
             return Task.FromResult(0);
         }
 
-        public Task TryUpdateRoom(JsonPatchDocument<Room> patch, string roomCode)
+        public Task TryUpdateRoom(JsonPatchDocument<Room> jsonPatch, string roomCode)
         {
             try
             {
@@ -30,7 +30,7 @@ namespace BlockArena.Database
 
                 if (room != null)
                 {
-                    patch.ApplyTo(room);
+                    jsonPatch.ApplyTo(room);
                 }
             }
             catch (Exception) 

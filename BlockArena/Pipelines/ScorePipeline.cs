@@ -8,10 +8,10 @@ using System.Threading.Tasks;
 
 namespace BlockArena.Interactors
 {
-    public class ScorePipeline(IRatingHandler ratingHandler, Func<Task<Rating>> getRating) : IScorePipeline
+    public class ScorePipeline(IRatingUpdater ratingUpdater, Func<Task<Rating>> getRating) : IScorePipeline
     {
         private readonly Func<Task<Rating>> getRating = getRating;
-        private readonly IRatingHandler ratingUpdater = ratingHandler;
+        private readonly IRatingUpdater ratingUpdater = ratingUpdater;
 
         public async Task Add(Models.UserScore userScore)
         {

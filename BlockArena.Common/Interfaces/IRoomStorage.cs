@@ -6,9 +6,9 @@ namespace BlockArena.Common.Interfaces
 {
     public interface IRoomStorage
     {
-        Task AddRoom(Room room);
-        Task TryUpdateRoom(JsonPatchDocument<Room> patch, string roomCode);
-        Task RemoveRoom(Room gameRoom);
-        Task<Page<Room>> GetRooms(int start, int count);
+        public Task AddRoom(Room room);
+        public Task TryUpdateRoom(JsonPatchDocument<Room> jsonPatch, string roomCode);
+        public Task RemoveRoom(Room room);
+        public Task<Page<Room>> GetRooms(int start, int count);
     }
 }

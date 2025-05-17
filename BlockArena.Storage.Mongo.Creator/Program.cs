@@ -8,7 +8,7 @@ namespace BlockArena.Storage.Mongo.Creator
         private const string DbName = "tetris";
         private const string CollectionName = "rooms";
 
-        static void Main()
+        public static void Main()
         {
             Console.Write("Enter your MongoDB connection string: ");
             var connectionString = Console.ReadLine();
@@ -22,7 +22,12 @@ namespace BlockArena.Storage.Mongo.Creator
                 var collection = database.GetCollection<BsonDocument>(CollectionName);
 
                 var keys = Builders<BsonDocument>.IndexKeys.Ascending("Timestamp");
-                var indexOptions = new CreateIndexOptions { ExpireAfter = TimeSpan.FromMinutes(5) };
+
+                var indexOptions = new CreateIndexOptions 
+                { 
+                    ExpireAfter = TimeSpan.FromMinutes(5) 
+                };
+
                 var indexModel = new CreateIndexModel<BsonDocument>(keys, indexOptions);
                 collection.Indexes.CreateOne(indexModel);
 

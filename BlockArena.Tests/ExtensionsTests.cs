@@ -3,7 +3,7 @@ using BlockArena.Common;
 using FluentAssertions;
 using Xunit;
 
-namespace BlockArena.Tests.Core
+namespace BlockArena.Tests
 {
     public class ExtensionsTests
     {

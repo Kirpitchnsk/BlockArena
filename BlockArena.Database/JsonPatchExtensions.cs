@@ -19,8 +19,6 @@ namespace BlockArena.Database
             return Builders<T>.Update.Combine(updates);
         }
 
-        #region Helpers
-
         private static UpdateDefinition<T> ConvertOperationToUpdate<T>(Operation<T> operation) where T : class
         {
             var field = GetField(operation.path.Trim('/').Replace("/", "."));
@@ -31,10 +29,10 @@ namespace BlockArena.Database
                 "add" => Builders<T>.Update.Set(field, value),
                 "replace" => Builders<T>.Update.Set(field, value),
                 "remove" => Builders<T>.Update.Unset(field),
-                "copy" => throw new NotImplementedException("Copy operation not supported"),
-                "move" => throw new NotImplementedException("Move operation not supported"),
-                "test" => throw new NotImplementedException("Test operation not supported"),
-                _ => throw new NotSupportedException($"Operation {operation.op} is not supported"),
+                "copy" => throw new NotImplementedException("Копирование не поддерживается"),
+                "move" => throw new NotImplementedException("Перемещение не поддерживается"),
+                "test" => throw new NotImplementedException("Тестирование не поддерживается"),
+                _ => throw new NotSupportedException($"Операция {operation.op} не поддерживается"),
             };
         }
 
@@ -42,7 +40,5 @@ namespace BlockArena.Database
         {
             return path.TrimStart('/');
         }
-
-        #endregion
     }
 }

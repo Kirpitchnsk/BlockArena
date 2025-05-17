@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace BlockArena.Middlewares
 {
-    public class TheLogger(RequestDelegate next, ILoggerFactory loggerFactory)
+    public class TheIpLogger(RequestDelegate next, ILoggerFactory loggerFactory)
     {
         private readonly RequestDelegate next = next;
         private readonly ILogger logger = loggerFactory.CreateLogger("IPLogger");

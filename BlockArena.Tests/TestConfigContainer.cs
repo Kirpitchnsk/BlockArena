@@ -1,7 +1,7 @@
 using System.IO;
 using Microsoft.Extensions.Configuration;
 
-namespace BlockArena.Storage.Tests
+namespace BlockArena.Tests
 {
     public static class TestConfigContainer
     {
@@ -9,7 +9,7 @@ namespace BlockArena.Storage.Tests
         {
             return new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .AddJsonFile("appsettings.json", false, true)
                 .AddEnvironmentVariables()
                 .Build();
         }

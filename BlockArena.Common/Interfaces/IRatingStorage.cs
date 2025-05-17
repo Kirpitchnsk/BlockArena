@@ -5,6 +5,6 @@ namespace BlockArena.Common.Interfaces
 {
     public interface IRatingStorage
     {
-        Task Add(UserScore userScore);
+        public Task Add(UserScore userScore);
     }
 }
