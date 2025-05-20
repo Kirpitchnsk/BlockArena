@@ -19,8 +19,8 @@ FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build-env
 
     RUN npm install -g yarn
     COPY . ./
-    RUN dotnet restore
-    WORKDIR /app/Tetris
+    RUN dotnet restore BlockArena/BlockArena.csproj
+    WORKDIR /app/BlockArena
     RUN dotnet publish -c Release -o /app/out /property:Version=$RELEASE_VERSION
 
 # Runtime image
