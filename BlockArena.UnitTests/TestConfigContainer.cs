@@ -1,7 +1,6 @@
-using System.IO;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 
-namespace BlockArena.Tests
+namespace BlockArena.UnitTests
 {
     public static class TestConfigContainer
     {
@@ -9,7 +8,7 @@ namespace BlockArena.Tests
         {
             return new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json", false, true)
+                .AddJsonFile("appsettings.Development.json", false, true)
                 .AddEnvironmentVariables()
                 .Build();
         }

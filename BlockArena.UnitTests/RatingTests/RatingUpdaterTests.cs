@@ -4,33 +4,31 @@ using BlockArena.Common.Models;
 using BlockArena.Common.Ratings;
 using FluentAssertions;
 using NSubstitute;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Xunit;
 
-namespace BlockArena.Tests.LeaderBoard
+namespace BlockArena.UnitTests.RatingTests
 {
+    [TestFixture]
     public class RatingUpdaterTests
     {
-        private readonly IRatingUpdater ratingUpdater;
-        private readonly IRatingStorage scoreBoardStorage;
-        private readonly Rating rating;
+        private IRatingUpdater ratingUpdater;
+        private IRatingStorage scoreBoardStorage;
+        private Rating rating;
 
-        public RatingUpdaterTests()
+        [SetUp]
+        public void SetUp()
         {
-            rating = new Models.Rating();
+            rating = new Rating();
             scoreBoardStorage = Substitute.For<IRatingStorage>();
             ratingUpdater = new RatingUpdater(
                 scoreBoardStorage,
                 () => Task.FromResult(rating));
         }
 
-        [Fact]
+        [Test]
         public async Task AddsTrimmedNewUserRecord()
         {
             //Arrange
-            var userScore = new UserScore { Score = 10, Username = "Stewie                                         " };
+            var userScore = new UserScore { Score = 40, Username = "Vlad                                         " };
             UserScore receivedUserScore = null;
             scoreBoardStorage
                 .When(storage => storage.Add(Arg.Any<UserScore>()))
@@ -40,37 +38,37 @@ namespace BlockArena.Tests.LeaderBoard
             await ratingUpdater.Add(userScore);
 
             //Assert
-            receivedUserScore.Should().BeEquivalentTo(new UserScore { Score = 10, Username = "Stewie" });
+            receivedUserScore.Should().BeEquivalentTo(new UserScore { Score = 40, Username = "Vlad" });
         }
 
-        [Fact]
+        [Test]
         public async Task DoesNotAddScoreForUserThatExistsWithSameOrHigherScore()
         {
             //Arrange
-            rating.UserScores = new List<UserScore> { new UserScore { Score = 10, Username = "stewie" } };
+            rating.UserScores = new List<UserScore> { new UserScore { Score = 13, Username = "vlad" } };
 
             //Act
             //Assert
-            (await ((Func<Task>)(async () => await ratingUpdater.Add(new UserScore { Score = 10, Username = "Stewie" })))
+            (await ((Func<Task>)(async () => await ratingUpdater.Add(new UserScore { Score = 13, Username = "vlad" })))
                 .Should()
                 .ThrowAsync<ValidationException>())
-                .WithMessage("Stewie already has a score equal to or greater than 10.");
+                .WithMessage("vlad уже имеет рекорд 13.");
 
             await scoreBoardStorage.Received(0).Add(Arg.Any<UserScore>());
         }
 
-        [Fact]
+        [Test]
         public async Task DoesNotAddScoreForUsernamesThatAreTooLong()
         {
             //Arrange
-            rating.UserScores = new List<UserScore> { new UserScore { Score = 10, Username = "stewie" } };
+            rating.UserScores = new List<UserScore> { new UserScore { Score = 26, Username = "vlad" } };
 
             //Act
             //Assert
-            (await ((Func<Task>)(async () => await ratingUpdater.Add(new UserScore { Score = 10, Username = "some really really long user name here" })))
+            (await ((Func<Task>)(async () => await ratingUpdater.Add(new UserScore { Score = 26, Username = "максимально огромнейшее имя для проверки здесь" })))
                 .Should()
                 .ThrowAsync<ValidationException>())
-                .WithMessage("Username length must not be over 20.");
+                .WithMessage("Имя не должно быть больше 20.");
 
             await scoreBoardStorage.Received(0).Add(Arg.Any<UserScore>());
         }
