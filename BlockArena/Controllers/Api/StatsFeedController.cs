@@ -6,9 +6,9 @@ using BlockArena.Models;
 
 namespace BlockArena.Controllers.Api
 {
-    public class StatsFeedController(IScorePipeline scoreInteractor) : Controller
+    public class StatsFeedController(IScorePipeline scorePipleline) : Controller
     {
-        private readonly IScorePipeline scoreInteractor = scoreInteractor;
+        private readonly IScorePipeline scorePipeline = scorePipleline;
 
         [Route("api/player-scores")]
         [HttpHead]
@@ -21,14 +21,14 @@ namespace BlockArena.Controllers.Api
         [HttpGet]
         public async Task<IEnumerable<UserScore>> GetScores()
         {
-            return await scoreInteractor.GetScores(5);
+            return await scorePipeline.GetScores(5);
         }
 
         [Route("api/player-scores")]
         [HttpPost]
         public async Task AddUserScore([FromBody] UserScore score)
         {
-            await scoreInteractor.Add(score);
+            await scorePipeline.Add(score);
         }
     }
 }

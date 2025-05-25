@@ -199,7 +199,7 @@ namespace BlockArena.Hubs
             {
                 var name = Context.Items["name"].ToString();
 
-                var doingBroadcast = Clients.Group(groupId).SendAsync("addToChat", new
+                var doBroadcast = Clients.Group(groupId).SendAsync("addToChat", new
                 {
                     notification = "disconnected",
                     userId
@@ -207,10 +207,10 @@ namespace BlockArena.Hubs
 
                 var patch = new JsonPatchDocument<Room>();
                 patch.Remove(x => x.Players[userId]);
-                var updatingRoom = roomStorage.TryUpdateRoom(patch, Context.Items["groupId"] as string);
+                var updateRoom = roomStorage.TryUpdateRoom(patch, Context.Items["groupId"] as string);
 
-                await doingBroadcast;
-                await updatingRoom;
+                await doBroadcast;
+                await updateRoom;
             }
             else
             {

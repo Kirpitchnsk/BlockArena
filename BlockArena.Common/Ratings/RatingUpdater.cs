@@ -10,7 +10,7 @@ namespace BlockArena.Common.Ratings
 {
     public class RatingUpdater(IRatingStorage ratingStorage, Func<Task<Rating>> getRating) : IRatingUpdater
     {
-        private readonly Func<Task<Rating>> getLeaderBoard = getRating;
+        private readonly Func<Task<Rating>> getRating = getRating;
         private readonly IRatingStorage ratingStorage = ratingStorage;
 
         public async Task Add(UserScore userScore)
@@ -22,7 +22,7 @@ namespace BlockArena.Common.Ratings
                 throw new ValidationException($"Имя не должно быть больше {Constants.MaxUsernameChars}.");
             }
 
-            var rating = await getLeaderBoard();
+            var rating = await getRating();
 
             var firstRepeat = (rating.UserScores ?? new List<UserScore>())
                 .FirstOrDefault(currentUserScore =>

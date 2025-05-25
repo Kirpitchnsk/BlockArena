@@ -83,13 +83,13 @@ namespace BlockArena
             var objectSerializer = new ObjectSerializer(_ => true);
             BsonSerializer.RegisterSerializer(objectSerializer);
 
-            builder.Services.AddSingleton<InMemoryGameRoomStorage>();
+            builder.Services.AddSingleton<InMemoryRoomStorage>();
             builder.Services.AddScoped<MongoRoomStorage>();
             builder.Services.AddScoped<IRoomStorage>(sp =>
             {
                 var mongoClient = sp.GetService<IMongoClient>();
                 return mongoClient == null
-                    ? sp.GetService<InMemoryGameRoomStorage>()
+                    ? sp.GetService<InMemoryRoomStorage>()
                     : sp.GetService<MongoRoomStorage>();
             });
 

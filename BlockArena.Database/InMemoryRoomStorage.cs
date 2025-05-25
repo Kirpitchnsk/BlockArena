@@ -8,7 +8,7 @@ using BlockArena.Common.Interfaces;
 
 namespace BlockArena.Database
 {
-    public class InMemoryGameRoomStorage : IRoomStorage
+    public class InMemoryRoomStorage : IRoomStorage
     {
         private List<Room> roomStorage = new List<Room>();
 
