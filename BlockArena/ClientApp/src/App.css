@@ -17,8 +17,18 @@ body {
 
   /* Image background (on top of gradient) */
   background-image: url("../public/wallpaper.jpg");
-  background-size: cover;
+  background-size: 45%;
   background-position: center;
+  position:relative
+}
+
+body::before{
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background: rgba(0,0,0,0.9)
 }
 
 a {
