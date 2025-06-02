@@ -39,6 +39,7 @@ export const shapes = [
   ],
 ];
 
+
 export const emptyBoard = tetrisBoardFrom(`
     ----------
     ----------
@@ -59,19 +60,23 @@ export const emptyBoard = tetrisBoardFrom(`
 
 export const TetrisGame = ({ game: gameState, onChange, shapeProvider, onPause }) => {
   const { board, mobile, oldScore, paused, score } = gameState;
-  const [explodingRows, setExplodingRows] = useState([]);
-  
+    const [explodingRows, setExplodingRows] = useState([]);
+   
+
+
+
   const game = {
     board: emptyBoard,
     score: 0,
     oldScore: undefined,
-    paused: false,
+    paused: true,
     mobile: false,
     ...{ board, score, oldScore, paused, mobile }
   }
   const instance = useRef({ onChange, shapeProvider, game });
   instance.current = { onChange, shapeProvider, game };
 
+   
   useEffect(() => {
     if (explodingRows.length > 0) {
       const timer = setTimeout(() => {

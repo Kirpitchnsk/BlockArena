@@ -33,14 +33,16 @@ body::before{
 }
 
 a {
-  color: black;
-  font-weight: bold;
-  text-decoration: underline;
+    color: white;
+    font-weight: bold;
+    text-decoration: underline;
+    opacity: 0.9;
 }
 
 .btn {
   font-weight: inherit;
   text-decoration: inherit;
+  opacity: 0.9;
 }
 
 .space-top-right {
@@ -66,4 +68,24 @@ color: white;
 
 .bold {
   font-weight: bold;
+}
+
+/* for Tetris Board */
+.tetris-board {
+    display: flex;
+    flex-direction: column;
+    background: #222;
+    width: fit-content;
+    margin: 0 auto;
+}
+
+.tetris-row {
+    display: flex;
+}
+
+.tetris-cell {
+    width: 32px;
+    height: 32px;
+    border: 1px solid #444;
+    background: #111;
 }
