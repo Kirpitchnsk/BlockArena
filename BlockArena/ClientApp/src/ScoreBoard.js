@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import { Spinner } from "./components/AnimatedIcons";
 
 export const LeaderBoard = styled.div`
-  background-color: rgba(245, 245, 245, 0.8);
+  background-color: rgba(0, 0, 0, 0.8);
   position: absolute;
   top: 0px;
   height: 80%;
