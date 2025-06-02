@@ -13,7 +13,7 @@ export const LeaderBoard = styled.div`
 `;
 
 const PostMyScore = styled.div`
-  background-color: rgba(245, 245, 245, 0.8);
+  background-color: rgba(0, 0, 0, 0.8);
   position: absolute;
   bottom: 0px;
   height: 20%;
