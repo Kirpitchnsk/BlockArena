@@ -20,8 +20,8 @@ import { TetrisBoard } from "./components/TetrisBoard";
 export const initialGameState = {
   board: emptyBoard,
   isOver: false,
-  oldScore: 0,
-  paused: false,
+    oldScore: 0,
+    paused: true,
   score: 0,
 };
 
@@ -131,8 +131,8 @@ export const [SinglePlayerGameContextProvider, useLocalPlayerGameContext] =
 
 const NextShapeContainer = styled.div`
   position: fixed;
-  top: 0;
-  left: 0;
+  top: 70px;
+  left: 240px;
   opacity: 0.5;
 `;
 
