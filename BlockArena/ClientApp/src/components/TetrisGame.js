@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { flushSync } from 'react-dom';
+import { flushSync } from "react-dom";
 import { TetrisBoard } from "./TetrisBoard";
 import { tetrisBoardFrom } from "../domain/serialization";
 import { move, rotate } from "../domain/motion";
@@ -39,7 +39,6 @@ export const shapes = [
   ],
 ];
 
-
 export const emptyBoard = tetrisBoardFrom(`
     ----------
     ----------
@@ -56,59 +55,75 @@ export const emptyBoard = tetrisBoardFrom(`
     ----------
     ----------
     ----------
-    ----------`);
+    ----------
+`);
 
-export const TetrisGame = ({ game: gameState, onChange, shapeProvider, onPause }) => {
+export const TetrisGame = ({
+  game: gameState,
+  onChange,
+  shapeProvider,
+  onPause,
+  onLinesCleared,
+}) => {
   const { board, mobile, oldScore, paused, score } = gameState;
-    const [explodingRows, setExplodingRows] = useState([]);
-   
+  const [explodingRows, setExplodingRows] = useState([]);
 
+  const instance = useRef({
+    onChange,
+    shapeProvider,
+    onLinesCleared,
+    gameState,
+  });
 
+  instance.current = {
+    onChange,
+    shapeProvider,
+    onLinesCleared,
+    gameState,
+  };
 
-  const game = {
-    board: emptyBoard,
-    score: 0,
-    oldScore: undefined,
-    paused: true,
-    mobile: false,
-    ...{ board, score, oldScore, paused, mobile }
-  }
-  const instance = useRef({ onChange, shapeProvider, game });
-  instance.current = { onChange, shapeProvider, game };
-
-   
   useEffect(() => {
     if (explodingRows.length > 0) {
       const timer = setTimeout(() => {
         setExplodingRows([]);
-      }, 500);
-      
+      }, 500); // ⏱️ очистка взрывающих строк через 0.5 сек
+
       return () => clearTimeout(timer);
     }
   }, [explodingRows]);
 
   const cycle = useCallback(() => {
-    if (!instance.current.game.paused) {
+    if (!instance.current.gameState.paused) {
       flushSync(() => {
-        instance.current.onChange(game => {
+        instance.current.onChange((game) => {
           const { board, score } = game;
           const iteratedGame = iterate({
             board,
             score,
-            shapeProvider: instance.current.shapeProvider
+            shapeProvider: instance.current.shapeProvider,
           });
 
-          if (iteratedGame.explodingRows && iteratedGame.explodingRows.length > 0) {
+          if (
+            iteratedGame.explodingRows &&
+            iteratedGame.explodingRows.length > 0
+          ) {
             setExplodingRows(iteratedGame.explodingRows);
+
+            // ⚠️ безопасный вызов setState (отложенный)
+            setTimeout(() => {
+              instance.current.onLinesCleared?.(
+                iteratedGame.explodingRows.length
+              );
+            }, 0);
           }
 
           return iteratedGame.isOver
             ? {
-              ...game,
-              board: emptyBoard,
-              score: 0,
-              oldScore: game.score,
-            }
+                ...game,
+                board: emptyBoard,
+                score: 0,
+                oldScore: game.score,
+              }
             : { ...game, ...iteratedGame };
         });
       });
@@ -117,23 +132,33 @@ export const TetrisGame = ({ game: gameState, onChange, shapeProvider, onPause }
 
   const keyPress = useCallback((event) => {
     const { keyCode } = event;
-    const processKeyCommand = ({ keyCode }) => {
-      const { board } = instance.current.game;
+
+    const processKeyCommand = () => {
+      const { board } = instance.current.gameState;
+
       const moves = {
         [keys.left]: () => move({ board, to: { x: -1 } }),
         [keys.right]: () => move({ board, to: { x: 1 } }),
         [keys.down]: () => move({ board, to: { y: 1 } }),
-        [keys.space]: () => iterateUntilInactive({ board }),
         [keys.up]: () => rotate({ board }),
+        [keys.space]: () => iterateUntilInactive({ board }),
       };
+
       const selectedMove = moves[keyCode];
-      selectedMove && event.preventDefault?.();
-      selectedMove && flushSync(() => {
-        instance.current.onChange(game => ({ ...game, board: selectedMove() }));
-      });
+      if (selectedMove) {
+        event.preventDefault?.();
+        flushSync(() => {
+          instance.current.onChange((game) => ({
+            ...game,
+            board: selectedMove(),
+          }));
+        });
+      }
     };
 
-    return !instance.current.game.paused && processKeyCommand({ keyCode });
+    if (!instance.current.gameState.paused) {
+      processKeyCommand();
+    }
   }, []);
 
   useEffect(() => {
@@ -143,15 +168,21 @@ export const TetrisGame = ({ game: gameState, onChange, shapeProvider, onPause }
     return () => {
       window.removeEventListener("keydown", keyPress, false);
       window.removeEventListener("iterate-game", cycle, false);
-    }
+    };
   }, [cycle, keyPress]);
 
   return (
     <div>
-      {!game.paused && game.mobile && (
-        <MobileControls onPause={onPause} onClick={(keyCode) => keyPress({ keyCode })} />
+      {!gameState.paused && gameState.mobile && (
+        <MobileControls
+          onPause={onPause}
+          onClick={(keyCode) => keyPress({ keyCode })}
+        />
       )}
-      <TetrisBoard board={game.board} explodingRows={explodingRows} />
+      <TetrisBoard
+        board={gameState.board}
+        explodingRows={explodingRows}
+      />
     </div>
   );
-}
+};

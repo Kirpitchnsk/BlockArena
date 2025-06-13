@@ -91,6 +91,7 @@ export const MultiplayerGame = ({ shapeProvider }) => {
     },
   });
 
+  // <<< ATTACK: регистрируем входящие “атаки”
   usePlayerListener();
   useHelloSender();
   useStatusSender();
@@ -100,25 +101,27 @@ export const MultiplayerGame = ({ shapeProvider }) => {
       <StringInput
         filter={(value) => (value ?? "").trim()}
         onSubmitString={async (name) => {
-          name
-            ? await gameHub.invoke
-                .status({
-                  groupId: organizerUserId,
-                  message: {
-                    userId: currentUserId,
-                    name: name,
-                  },
+          if (name) {
+            try {
+              await gameHub.invoke.status({
+                groupId: organizerUserId,
+                message: {
+                  userId: currentUserId,
+                  name: name,
+                },
+              });
+              setUsername(name);
+              exitModal();
+            } catch ({ message }) {
+              window.dispatchEvent(
+                new CustomEvent("user-error", {
+                  detail: trimHubExceptionMessage(message),
                 })
-                .then(() => setUsername(name))
-                .then(exitModal)
-                .catch(({ message }) =>
-                  window.dispatchEvent(
-                    new CustomEvent("user-error", {
-                      detail: trimHubExceptionMessage(message),
-                    })
-                  )
-                )
-            : exitModal();
+              );
+            }
+          } else {
+            exitModal();
+          }
         }}
         submittingText={
           <>
@@ -135,6 +138,20 @@ export const MultiplayerGame = ({ shapeProvider }) => {
   const otherPlayerIds = Object.keys(otherPlayers);
   const otherPlayersLink = `${window.location.protocol}//${window.location.host}/${organizerUserId}`;
 
+  // <<< ATTACK: колбэк, который будет вызываться при очистке линий
+  const handleLinesCleared = (linesCount) => {
+    if (!isOrganizer) {
+      console.log("[DEBUG] Отправляем мусор: ", linesCount);
+      gameHub.invoke.attack({
+        groupId: organizerUserId,
+        message: {
+          userId: currentUserId,
+          lines: linesCount,
+        },
+      });
+    }
+  };  
+
   const gameContextInfo = (
     <div className="card" style={{ marginTop: "1rem" }}>
       <div className="card-header">Подключение</div>
@@ -143,7 +160,7 @@ export const MultiplayerGame = ({ shapeProvider }) => {
           <thead>
             <tr>
               <th colSpan={2}>
-              Другие игроки могут присоединиться, воспользовавшись кодом или URL-адресом, указанным ниже:
+                Другие игроки могут присоединиться, воспользовавшись кодом или URL-адресом ниже:
               </th>
             </tr>
           </thead>
@@ -328,6 +345,7 @@ export const MultiplayerGame = ({ shapeProvider }) => {
         <>
           <label htmlFor="duration">Продолжительность игры:</label>
           <GameDurationSelect
+            id="duration"
             name="duration"
             className="form-control"
             value={selectedDuration}
@@ -364,6 +382,7 @@ export const MultiplayerGame = ({ shapeProvider }) => {
                 header={gameHeader}
                 additionalControls={<>{singlePlayerGameLink}</>}
                 className="col-xs-12 col-md-4"
+                onLinesCleared={handleLinesCleared} // <<< ATTACK: передаем сюда
               >
                 <LeaderBoard style={{ height: "100%" }}>
                   Игроки:
@@ -378,10 +397,7 @@ export const MultiplayerGame = ({ shapeProvider }) => {
                       </div>
                     ))}
                   <div>
-                    <CommandButton
-                      onClick={promptUserName}
-                      className="btn btn-primary"
-                    >
+                    <CommandButton onClick={promptUserName} className="btn btn-primary">
                       Ввести имя пользователя
                     </CommandButton>
                   </div>

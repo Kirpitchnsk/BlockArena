@@ -20,6 +20,7 @@ using BlockArena.Common.Models;
 using BlockArena.Common.Ratings;
 using BlockArena.Common.Interfaces;
 using BlockArena.Middlewares;
+using Microsoft.AspNetCore.HttpOverrides;
 
 namespace BlockArena
 {
@@ -35,6 +36,7 @@ namespace BlockArena
 
             var signalR = builder.Services.AddSignalR(options =>
             {
+                options.EnableDetailedErrors = true;
                 options.AddFilter<ExceptionHubFilter>();
             });
 

@@ -1,3 +1,5 @@
+# См. статью по ссылке https://aka.ms/customizecontainer, чтобы узнать как настроить контейнер отладки и как Visual Studio использует этот Dockerfile для создания образов для ускорения отладки.
+
 # Build image
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build-env
     ARG RELEASE_VERSION=1.0.0.0
@@ -46,5 +48,8 @@ FROM mcr.microsoft.com/dotnet/aspnet:9.0
     NEW_RELIC_LICENSE_KEY=${NEWRELIC_KEY} \
     NEW_RELIC_APP_NAME=tetris
 
+    ENV ASPNETCORE_URLS=http://+:80;https://+:443
     EXPOSE 80
+    EXPOSE 443
+
     ENTRYPOINT ["dotnet", "BlockArena.dll"]

@@ -5,7 +5,6 @@ import { useLocation, useParams } from 'react-router-dom';
 import { initialEmptyPlayersList, selectableDurations } from './constants'
 import { createManagedContext, useMountedOnlyState } from "leaf-validator";
 import { useLifeCycle } from "./hooks/useLifeCycle";
-
 const signals = [
   'hello',
   'playersListUpdate',
@@ -17,7 +16,8 @@ const signals = [
   'noOranizer',
   'reset',
   'sendChat',
-  'setChatLines'
+  'setChatLines',
+  'attack' // <<< ATTACK: новый сигнал
 ];
 
 export const [MultiplayerContextProvider, useMultiplayerContext, MultiplayerContext] = createManagedContext(() => {

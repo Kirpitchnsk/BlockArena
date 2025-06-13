@@ -20,8 +20,8 @@ import { TetrisBoard } from "./components/TetrisBoard";
 export const initialGameState = {
   board: emptyBoard,
   isOver: false,
-    oldScore: 0,
-    paused: true,
+  oldScore: 0,
+  paused: true,
   score: 0,
 };
 
@@ -136,16 +136,14 @@ const NextShapeContainer = styled.div`
   opacity: 0.5;
 `;
 
-const shapeToBoard = (shape) =>
-  shape.map((row) => row.map((cell) => ({ type: cell ? "active" : "empty" })));
-
 export const LocalPlayerGame = ({
   shapeProvider,
   children: otherPlayers,
   header,
   additionalControls,
   isOnlyPlayer,
-  ...otherProps
+  onLinesCleared, 
+  ...otherMetaProps 
 }) => {
   const {
     game,
@@ -164,11 +162,13 @@ export const LocalPlayerGame = ({
     <>
       {!game.paused && (
         <NextShapeContainer>
-          <TetrisBoard board={shapeToBoard(nextShape)} noBackground />
+          <TetrisBoard board={nextShape.map(row =>
+            row.map(cell => ({ type: cell ? "active" : "empty" }))
+          )} noBackground />
         </NextShapeContainer>
       )}
       <GameMetaFrame
-        {...otherProps}
+        {...otherMetaProps} 
         header={
           <>
             {header}
@@ -187,6 +187,7 @@ export const LocalPlayerGame = ({
             onPause={
               !otherPlayers && (() => pause({ showScoreBoard: !otherPlayers }))
             }
+            onLinesCleared={onLinesCleared}  
           />
         }
         scoreBoard={

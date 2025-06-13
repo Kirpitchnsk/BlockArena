@@ -1,18 +1,17 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text.Json;
-using System.Threading.Tasks;
+using BlockArena.Common;
+using BlockArena.Common.Interfaces;
+using BlockArena.Common.Models;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using NewRelic.Api.Agent;
 using Sentry;
-using BlockArena.Common;
-using BlockArena.Common.Models;
-using BlockArena.Common.Interfaces;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net.WebSockets;
-using ZstdSharp.Unsafe;
+using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace BlockArena.Hubs
 {
@@ -221,6 +220,12 @@ namespace BlockArena.Hubs
             {
                 logger.LogError(exception, "Disconnected");
             }
+        }
+
+        [Transaction(Web = true)]
+        public async Task Attack(GroupMessage message)
+        {
+            await Clients.Group(Context.Items["groupId"] as string).SendAsync("attack", message.Message);
         }
 
         public string GetNameFrom(GroupMessage groupMessage)

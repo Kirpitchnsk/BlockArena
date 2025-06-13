@@ -2,6 +2,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using BlockArena.Common.Models;
 using BlockArena.Common.Interfaces;
+using System;
 
 namespace BlockArena.Controllers.Api
 {
@@ -11,9 +12,18 @@ namespace BlockArena.Controllers.Api
 
         [HttpGet]
         [Route("api/rooms")]
-        public async Task<Page<Room>> GetRooms([FromQuery] int start, [FromQuery] int count)
+        public async Task<IActionResult> GetRooms([FromQuery] int start, [FromQuery] int count)
         {
-            return await roomStorage.GetRooms(start, count);
+            try
+            {
+                var page = await roomStorage.GetRooms(start, count);
+                return Ok(page);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[Mongo ERROR] {ex.GetType().Name}: {ex.Message}");
+                return StatusCode(500, $"MongoDB error: {ex.Message}");
+            }
         }
     }
 }
