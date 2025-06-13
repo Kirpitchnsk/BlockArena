@@ -1,43 +1,42 @@
+// src/components/TetrisBoard.js
 import React from "react";
 import { activeColumnRangeFrom } from "../domain/board";
 import { empty } from "../core/constants";
-import styled from "styled-components";
+import styled, { keyframes } from "styled-components";
 import { explosionAnimation } from "./AnimatedIcons";
 
+// Ширина/высота клеток
+const SQUARE_SIZE = 29.3;
+
+// Палитра цветов для тетромино
+const COLORS = [
+"#F56AA3", // I (было #FF0D72)
+"#6AADF5", // J (было #0DC2FF)
+"#6AF5AA", // L (было #0DFF72)
+"#D778DD", // O (было #F538FF)
+"#F5B16A", // S (было #FF8E0D)
+"#F5E878", // T (было #FFE138)
+"#7891F5"  // Z (было #3877FF)
+];
+
+// Базовый компонент «квадратик»
 const Square = styled.div`
-  width: 29.3px;
-  height: 29.3px;
-  margin: 0;
+  width: ${SQUARE_SIZE}px;
+  height: ${SQUARE_SIZE}px;
+  box-sizing: border-box;
+  border: 1px solid #ffffff; /* белая обводка */
 `;
 
-const Active = styled(Square)`
-  background-color: #0c00ff;
-`;
-const Inactive = styled(Square)`
-  background-color: #050153;
-`;
-const ActiveEmpty = styled(Square)`
-  background-color: #111;
-`;
-const InactiveEmpty = styled(Square)`
-  background-color: #222;
-`;
-
-const ExplodingInactive = styled(Inactive)`
+// Анимированный квадрат при взрыве
+const ExplodingSquare = styled(Square)`
   animation: ${explosionAnimation} 0.5s ease-out forwards;
 `;
 
-const Squares = {
-  active: <Active data-testid="space" title="*" />,
-  inactive: <Inactive data-testid="space" title="#" />,
-  "active-empty": <ActiveEmpty data-testid="space" title="-" />,
-  "inactive-empty": <InactiveEmpty data-testid="space" title="-" />,
-  explosion: <ExplodingInactive data-testid="space" title="#" />,
-};
-
-const TabelCell = styled.td`
-  padding: 0;
-`;
+// Вспомогательная функция: цвет активной клетки в зависимости от её координат
+function getColor(x, y) {
+  // простой детерминированный выбор цвета: сумма индексов по модулю палитры
+  return COLORS[(x + y) % COLORS.length];
+}
 
 export function TetrisBoard({
   board,
@@ -45,17 +44,43 @@ export function TetrisBoard({
   noBackground = false,
 }) {
   const activeColumnRange = activeColumnRangeFrom({ board });
-  const squareFrom = ({ square, x, y }) => {
-    if (explodingRows.includes(y)) return Squares["explosion"];
 
-    const type =
-      square === empty
-        ? x >= activeColumnRange.x1 && x <= activeColumnRange.x2
-          ? "active-empty"
-          : "inactive-empty"
-        : square.type;
+  const renderCell = ({ square, x, y }) => {
+    // если строка «взрывается» — показываем анимированную клетку
+    if (explodingRows.includes(y)) {
+      return (
+        <ExplodingSquare
+          data-testid="space"
+          title="#"
+          style={{ backgroundColor: "#333" }}
+        />
+      );
+    }
 
-    return Squares[type];
+    // пустая или занятая область
+    const isEmpty = square === empty;
+    const inActiveZone =
+      isEmpty && x >= activeColumnRange.x1 && x <= activeColumnRange.x2;
+
+    if (isEmpty) {
+      // пустая зона внутри активной области — чуть светлее
+      return (
+        <Square
+          data-testid="space"
+          title="-"
+          style={{ backgroundColor: inActiveZone ? "#222" : "#111" }}
+        />
+      );
+    } else {
+      // занятая (active) — разноцветно
+      return (
+        <Square
+          data-testid="space"
+          title="*"
+          style={{ backgroundColor: getColor(x, y) }}
+        />
+      );
+    }
   };
 
   return (
@@ -64,9 +89,9 @@ export function TetrisBoard({
         {board.map((row, y) => (
           <tr key={y} data-testid="row">
             {row.map((square, x) => (
-              <TabelCell key={`${x},${y}`} style={{ padding: "0px" }}>
-                {squareFrom({ square, x, y })}
-              </TabelCell>
+              <td key={`${x},${y}`} style={{ padding: 0 }}>
+                {renderCell({ square, x, y })}
+              </td>
             ))}
           </tr>
         ))}
