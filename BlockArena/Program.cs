@@ -1,33 +1,32 @@
+using BlockArena.Common.Interfaces;
+using BlockArena.Common.Models;
+using BlockArena.Common.Ratings;
 using BlockArena.Database;
 using BlockArena.Hubs;
 using BlockArena.Interactors;
 using BlockArena.Interfaces;
+using BlockArena.Middlewares;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Connections;
+using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.SignalR;
+using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
+using Microsoft.AspNetCore.WebSockets;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Serializers;
 using MongoDB.Driver;
 using StackExchange.Redis;
-using System.Threading.Tasks;
 using System;
-using Microsoft.Extensions.Hosting;
-using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Microsoft.AspNetCore.SignalR;
-using BlockArena.Common.Models;
-using BlockArena.Common.Ratings;
-using BlockArena.Common.Interfaces;
-using BlockArena.Middlewares;
-using Microsoft.AspNetCore.HttpOverrides;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
-using Microsoft.AspNetCore.WebSockets;
 using System.Net;
-using Microsoft.AspNetCore.Http;
 using System.Net.WebSockets;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace BlockArena
 {
@@ -39,13 +38,11 @@ namespace BlockArena
             var configuration = builder.Configuration;
             var env = builder.Environment;
 
-            // 1. Конфигурация Kestrel для WebSocket
             builder.WebHost.ConfigureKestrel(serverOptions =>
             {
                 serverOptions.Limits.KeepAliveTimeout = TimeSpan.FromMinutes(2);
                 serverOptions.AllowSynchronousIO = true;
 
-                // Для локальной отладки HTTPS
                 if (env.IsDevelopment())
                 {
                     serverOptions.Listen(IPAddress.Loopback, 5000);
@@ -56,7 +53,6 @@ namespace BlockArena
                 }
             });
 
-            // 2. Поддержка заголовков от прокси
             builder.Services.Configure<ForwardedHeadersOptions>(options =>
             {
                 options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
@@ -64,13 +60,11 @@ namespace BlockArena
                 options.KnownProxies.Clear();
             });
 
-            // 3. Добавление сервисов WebSocket
             builder.Services.AddWebSockets(options =>
             {
                 options.KeepAliveInterval = TimeSpan.FromMinutes(2);
             });
 
-            // SignalR с увеличенными таймаутами
             var signalR = builder.Services.AddSignalR(options =>
             {
                 options.EnableDetailedErrors = true;
@@ -139,7 +133,6 @@ namespace BlockArena
 
             var app = builder.Build();
 
-            // 4. Применение ForwardedHeaders в начале конвейера
             app.UseForwardedHeaders();
 
             app.UseMiddleware<TheIpLogger>();
@@ -159,7 +152,6 @@ namespace BlockArena
             else
             {
                 app.UseExceptionHandler("/Error");
-                // HSTS отключен для работы за прокси
             }
 
             app.UseSwagger();
@@ -171,7 +163,6 @@ namespace BlockArena
             app.UseStaticFiles();
             app.UseSpaStaticFiles();
 
-            // 5. Добавление поддержки WebSocket
             app.UseWebSockets();
 
             app.UseEndpoints(endpoints =>
@@ -182,7 +173,6 @@ namespace BlockArena
                     options.Transports = HttpTransportType.WebSockets | HttpTransportType.LongPolling;
                 });
 
-                // 6. Диагностический эндпоинт для WebSocket
                 endpoints.MapGet("/ws-test", async context =>
                 {
                     if (context.WebSockets.IsWebSocketRequest)
@@ -214,7 +204,6 @@ namespace BlockArena
                 }
             });
 
-            // 7. Настройка порта для Deploy-f
 #if !DEBUG
 var port = Environment.GetEnvironmentVariable("PORT") ?? "80";
 app.Urls.Add("http://*:" + port);
