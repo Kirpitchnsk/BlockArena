@@ -21,23 +21,63 @@ using BlockArena.Common.Ratings;
 using BlockArena.Common.Interfaces;
 using BlockArena.Middlewares;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
+using Microsoft.AspNetCore.WebSockets;
+using System.Net;
+using Microsoft.AspNetCore.Http;
+using System.Net.WebSockets;
+using System.Threading;
 
 namespace BlockArena
 {
     public class Program
     {
-        private static void Main(string[] args)
+        public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
             var configuration = builder.Configuration;
             var env = builder.Environment;
 
-            // 1. SERVICES
+            // 1. Конфигурация Kestrel для WebSocket
+            builder.WebHost.ConfigureKestrel(serverOptions =>
+            {
+                serverOptions.Limits.KeepAliveTimeout = TimeSpan.FromMinutes(2);
+                serverOptions.AllowSynchronousIO = true;
 
+                // Для локальной отладки HTTPS
+                if (env.IsDevelopment())
+                {
+                    serverOptions.Listen(IPAddress.Loopback, 5000);
+                    serverOptions.Listen(IPAddress.Loopback, 5001, listenOptions =>
+                    {
+                        listenOptions.UseHttps();
+                    });
+                }
+            });
+
+            // 2. Поддержка заголовков от прокси
+            builder.Services.Configure<ForwardedHeadersOptions>(options =>
+            {
+                options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+                options.KnownNetworks.Clear();
+                options.KnownProxies.Clear();
+            });
+
+            // 3. Добавление сервисов WebSocket
+            builder.Services.AddWebSockets(options =>
+            {
+                options.KeepAliveInterval = TimeSpan.FromMinutes(2);
+            });
+
+            // SignalR с увеличенными таймаутами
             var signalR = builder.Services.AddSignalR(options =>
             {
                 options.EnableDetailedErrors = true;
                 options.AddFilter<ExceptionHubFilter>();
+                options.ClientTimeoutInterval = TimeSpan.FromSeconds(60);
+                options.HandshakeTimeout = TimeSpan.FromSeconds(30);
+                options.KeepAliveInterval = TimeSpan.FromSeconds(15);
             });
 
             if (configuration["UseBackplane"]?.ToLower() == "true")
@@ -63,6 +103,7 @@ namespace BlockArena
             builder.Services.AddScoped<IRatingUpdater, RatingUpdater>();
             builder.Services.AddScoped<Func<Task<Rating>>>(sp => sp.GetService<IRatingHandler>().GetRating);
             builder.Services.AddScoped<IScorePipeline, ScorePipeline>();
+
             builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
             {
                 var config = new ConfigurationOptions
@@ -74,7 +115,6 @@ namespace BlockArena
 
                 return ConnectionMultiplexer.Connect(config);
             });
-
 
             builder.Services.AddSingleton<IMongoClient>(sp =>
                 configuration["MongoConnectionString"] == null
@@ -97,11 +137,10 @@ namespace BlockArena
 
             builder.Services.AddSingleton<ExceptionHubFilter>();
 
-            // 2. BUILD
-
             var app = builder.Build();
 
-            // 3. MIDDLEWARE
+            // 4. Применение ForwardedHeaders в начале конвейера
+            app.UseForwardedHeaders();
 
             app.UseMiddleware<TheIpLogger>();
             app.UseResponseCompression();
@@ -113,9 +152,6 @@ namespace BlockArena
                 app.UseSentryTracing();
             }
 
-            app.UseMiddleware<HttpsProxyRedirection>();
-            app.UseMiddleware<RelicIgnoreCreation>("/gameHub");
-
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -123,7 +159,7 @@ namespace BlockArena
             else
             {
                 app.UseExceptionHandler("/Error");
-                app.UseHsts();
+                // HSTS отключен для работы за прокси
             }
 
             app.UseSwagger();
@@ -135,11 +171,31 @@ namespace BlockArena
             app.UseStaticFiles();
             app.UseSpaStaticFiles();
 
+            // 5. Добавление поддержки WebSocket
+            app.UseWebSockets();
+
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapHub<GameHub>("/gameHub", options =>
                 {
-                    options.Transports = HttpTransportType.WebSockets;
+                    // Разрешаем WebSocket и LongPolling как fallback
+                    options.Transports = HttpTransportType.WebSockets | HttpTransportType.LongPolling;
+                });
+
+                // 6. Диагностический эндпоинт для WebSocket
+                endpoints.MapGet("/ws-test", async context =>
+                {
+                    if (context.WebSockets.IsWebSocketRequest)
+                    {
+                        using var ws = await context.WebSockets.AcceptWebSocketAsync();
+                        await Task.Delay(2000);
+                        await ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "OK", CancellationToken.None);
+                    }
+                    else
+                    {
+                        context.Response.StatusCode = 400;
+                        await context.Response.WriteAsync("WebSocket only");
+                    }
                 });
 
                 endpoints.MapControllerRoute(
@@ -158,11 +214,12 @@ namespace BlockArena
                 }
             });
 
-            // 4. RUN
-
+            // 7. Настройка порта для Deploy-f
 #if !DEBUG
 var port = Environment.GetEnvironmentVariable("PORT") ?? "80";
 app.Urls.Add("http://*:" + port);
+
+ Console.WriteLine($"Starting server on port {port}");
 #endif
 
             app.Run();
