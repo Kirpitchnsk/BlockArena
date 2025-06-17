@@ -13,22 +13,24 @@ const LeftButton = styled.button`
     opacity: 0.5;
 `;
 
+//Rotate
 const TopButton = styled.button`
     position: fixed;
-    left: 15%;
-    top: 0px;
-    width: 70%;
-    height: 15%;
+    left: 18%;
+    top: 17px;
+    width: 30%;
+    height: 6%
     opacity: 0.5;
 `;
 
+//pause
 const TopStackedButton = styled.button`
     position: fixed;
-    left: 15%;
-    top: 15%;
-    width: 70%;
-    height: 15%;
-    opacity: 0.5;
+    left: 50%;
+    top: 2%;
+    width: 26%;
+    height: 6%;
+    opacity: 0.7;
 `;
 
 const RighButton = styled.button`
@@ -43,18 +45,18 @@ const RighButton = styled.button`
 const BottomStackedButton = styled.button`
     position: fixed;
     left: 15%;
-    bottom: 15%;
+    bottom: 21%;
     width: 70%;
-    height: 15%;
+    height: 5%;
     opacity: 0.5;
 `;
 
 const BottomButton = styled.button`
     position: fixed;
     left: 15%;
-    bottom: 0px;
+    bottom: 35px;
     width: 70%;
-    height: 15%;
+    height: 5%;
     opacity: 0.5;
 `;
 
