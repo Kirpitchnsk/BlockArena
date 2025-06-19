@@ -157,7 +157,7 @@ export const usePlayerListener = () => {
         }));
 
         setOtherPlayers((otherPlayers) =>
-          [{}, ...Object.keys(otherPlayers)].reduce(
+          Object.keys(otherPlayers).reduce(
             (currentPlayers, userId) => ({
               ...currentPlayers,
               [userId]: {
@@ -188,23 +188,24 @@ export const usePlayerListener = () => {
 
       setChatLines: (chatLines) => setChatLines(chatLines),
 
-      // 🎯 Обработка мусорных строк
       attack: ({ userId, lines }) => {
         console.log("[DEBUG] Пришла атака:", userId, "на", lines);
-        if (userId === currentUserId) return;
-      
-        setGame((game) => {
-          const width = game.board[0].length;
-      
-          // Каждый раз создаём новый garbageRow с уникальными объектами
-          const createGarbageRow = () =>
+        if (userId === externalsRef.current.currentUserId) return;
+
+        externalsRef.current.setGame((prevGame) => {
+          const width = prevGame.board[0].length;
+
+          const makeGarbageRow = () =>
             Array.from({ length: width }, () => ({ type: "inactive" }));
-      
-          const garbage = Array.from({ length: lines }, () => createGarbageRow());
-      
-          const newBoard = [...garbage, ...game.board.slice(0, -lines)];
-      
-          return { ...game, board: newBoard };
+
+          const garbageRows = Array.from({ length: lines }, () => makeGarbageRow());
+
+          const newBoard = [
+            ...prevGame.board.slice(lines),
+            ...garbageRows
+          ];
+
+          return { ...prevGame, board: newBoard };
         });
       },
     });

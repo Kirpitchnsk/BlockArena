@@ -1,5 +1,5 @@
 import React from "react";
-import { CommandButton } from "./components/CommandButton";
+import { CommandButton } from "./components/commandButton";
 import { useOrganizerId } from "./hooks/useOrganizerId";
 import { useMultiplayerContext } from "./MultiplayerContext";
 import { Spinner } from "./components/AnimatedIcons";

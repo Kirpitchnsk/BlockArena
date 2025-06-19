@@ -1,1 +1,1 @@
-export { leaderBoardRestService as leaderBoardService } from './leader-board';
+export { leaderBoardRestService as leaderBoardService } from './rating';

@@ -225,7 +225,7 @@ namespace BlockArena.Hubs
         [Transaction(Web = true)]
         public async Task Attack(GroupMessage message)
         {
-            await Clients.Group(Context.Items["groupId"] as string).SendAsync("attack", message.Message);
+            await Clients.OthersInGroup(message.GroupId).SendAsync("attack", message.Message);
         }
 
         public string GetNameFrom(GroupMessage groupMessage)

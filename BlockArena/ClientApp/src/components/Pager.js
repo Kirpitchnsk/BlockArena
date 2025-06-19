@@ -1,5 +1,5 @@
 import React from "react";
-import { CommandButton } from "./CommandButton";
+import { CommandButton } from "./commandButton";
 import { Spinner } from './AnimatedIcons';
 
 const MaxPages = 5;

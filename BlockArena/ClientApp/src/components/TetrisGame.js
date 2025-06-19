@@ -86,7 +86,7 @@ export const TetrisGame = ({
     if (explodingRows.length > 0) {
       const timer = setTimeout(() => {
         setExplodingRows([]);
-      }, 500); // ⏱️ очистка взрывающих строк через 0.5 сек
+      }, 500); 
 
       return () => clearTimeout(timer);
     }
@@ -109,7 +109,6 @@ export const TetrisGame = ({
           ) {
             setExplodingRows(iteratedGame.explodingRows);
 
-            // ⚠️ безопасный вызов setState (отложенный)
             setTimeout(() => {
               instance.current.onLinesCleared?.(
                 iteratedGame.explodingRows.length

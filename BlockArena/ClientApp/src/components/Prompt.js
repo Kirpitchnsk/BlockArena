@@ -1,5 +1,5 @@
 import React, { useRef } from "react";
-import { CommandButton } from "./CommandButton";
+import { CommandButton } from "./commandButton";
 import { TextInput } from "./TextInput";
 import { useMountedOnlyState } from "leaf-validator";
 import { useEscapeKeyOnClick } from "../hooks/useEscapeKeyOnClick";

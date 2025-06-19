@@ -17,7 +17,7 @@ const signals = [
   'reset',
   'sendChat',
   'setChatLines',
-  'attack' // <<< ATTACK: новый сигнал
+  'attack'
 ];
 
 export const [MultiplayerContextProvider, useMultiplayerContext, MultiplayerContext] = createManagedContext(() => {

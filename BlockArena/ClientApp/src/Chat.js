@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useMultiplayerContext } from "./MultiplayerContext";
 import { TextInput } from "./components/TextInput";
-import { CommandButton } from "./components/CommandButton";
+import { CommandButton } from "./components/commandButton";
 import styled from "styled-components";
 import { useOrganizerId } from "./hooks/useOrganizerId";
 import { useLocalPlayerGameContext } from "./LocalPlayerGame";
@@ -69,7 +69,7 @@ export function GameChat(props) {
         submittingText={<><Spinner /> Отправка...</>}
       >
         <p>Перед отправкой сообщения у вас должно быть имя пользователя.</p>
-        <p>Какое имя пользователя вы хотели бы получить?</p>
+        <p>Напишите ваш игровой ник?</p>
       </StringInput>
     ));
 

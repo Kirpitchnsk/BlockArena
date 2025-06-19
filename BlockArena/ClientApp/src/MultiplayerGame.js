@@ -1,7 +1,7 @@
 import React from "react";
 import { Organizer } from "./Organizer";
 import { useMultiplayerContext } from "./MultiplayerContext";
-import { CommandButton } from "./components/CommandButton";
+import { CommandButton } from "./components/commandButton";
 import LocalPlayerGame, {
   initialGameState,
   useLocalPlayerGameContext,
@@ -11,14 +11,14 @@ import { stringFrom } from "./domain/serialization";
 import { TetrisBoard } from "./components/TetrisBoard";
 import { GameMetaFrame } from "./components/GameMetaFrame";
 import { Link } from "react-router-dom";
-import { GameChat } from "./GameChat";
+import { GameChat } from "./Chat";
 import { emptyBoard } from "./components/TetrisGame";
 import { usePlayerListener } from "./hooks/usePlayerListener";
 import { useHelloSender } from "./hooks/useHelloSender";
 import { useStatusSender } from "./hooks/useStatusSender";
 import { getDisplayTimeFrom } from "./domain/time";
 import { selectableDurations } from "./constants";
-import { LeaderBoard } from "./ScoreBoard";
+import { LeaderBoard } from "./Rating";
 import {
   CenterScreen,
   Centered,
@@ -29,7 +29,7 @@ import { useOrganizerId } from "./hooks/useOrganizerId";
 import { useLifeCycle } from "./hooks/useLifeCycle";
 import styled from "styled-components";
 import { CopyButton } from "./components/CopyButton";
-import { BigStartButton } from "./BigStartButton";
+import { BigStartButton } from "./StartButton";
 import { Spinner } from "./components/AnimatedIcons";
 import { withTemporaryDisable } from "./components/HOCs/withTemporaryDisable";
 import { ContentSwapWhenDisabled } from "./components/ContentSwapWhenDisabled";
@@ -91,7 +91,6 @@ export const MultiplayerGame = ({ shapeProvider }) => {
     },
   });
 
-  // <<< ATTACK: регистрируем входящие “атаки”
   usePlayerListener();
   useHelloSender();
   useStatusSender();
@@ -138,10 +137,7 @@ export const MultiplayerGame = ({ shapeProvider }) => {
   const otherPlayerIds = Object.keys(otherPlayers);
   const otherPlayersLink = `${window.location.protocol}//${window.location.host}/${organizerUserId}`;
 
-  // <<< ATTACK: колбэк, который будет вызываться при очистке линий
   const handleLinesCleared = (linesCount) => {
-    if (!isOrganizer) {
-      console.log("[DEBUG] Отправляем мусор: ", linesCount);
       gameHub.invoke.attack({
         groupId: organizerUserId,
         message: {
@@ -149,7 +145,6 @@ export const MultiplayerGame = ({ shapeProvider }) => {
           lines: linesCount,
         },
       });
-    }
   };  
 
   const gameContextInfo = (
@@ -220,12 +215,12 @@ export const MultiplayerGame = ({ shapeProvider }) => {
       onClick={() => gameHub.invoke.reset({ groupId: organizerUserId })}
       runningText={
         <>
-          <Spinner /> Пересоздание...
+          <Spinner /> Создание новой игры...
         </>
       }
       disableForMilliseconds={1500}
     >
-      Пересоздать игру
+      Начать заново
     </CommandButton>
   );
 
@@ -295,7 +290,7 @@ export const MultiplayerGame = ({ shapeProvider }) => {
         </>
       }
     >
-      Попробовать снова связаться с организатором
+      Переподключиться
     </CommandButton>
   );
 

@@ -1,6 +1,6 @@
 import React from "react";
 import { Header } from "../Styling";
-import { CommandButton } from './CommandButton';
+import { CommandButton } from './commandButton';
 
 export class ReloadRecoveryErrorBoundary extends React.Component {
     constructor(props) {

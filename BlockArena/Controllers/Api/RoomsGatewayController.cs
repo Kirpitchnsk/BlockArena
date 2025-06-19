@@ -6,7 +6,7 @@ using System;
 
 namespace BlockArena.Controllers.Api
 {
-    public class GameRoomController(IRoomStorage roomStorage) : Controller
+    public class RoomsGatewayController(IRoomStorage roomStorage) : Controller
     {
         private readonly IRoomStorage roomStorage = roomStorage;
 

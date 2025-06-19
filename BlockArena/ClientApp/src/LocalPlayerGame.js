@@ -3,7 +3,7 @@ import { TetrisGame, emptyBoard } from "./components/TetrisGame";
 import { StringInput as StringPrompt, usePrompt } from "./components/Prompt";
 import { leaderBoardService } from "./services";
 import "./App.css";
-import { ScoreBoard } from "./ScoreBoard";
+import { ScoreBoard } from "./Rating";
 import { GameControls } from "./GameControls";
 import {
   createManagedContext,
@@ -77,7 +77,7 @@ export const [SinglePlayerGameContextProvider, useLocalPlayerGameContext] =
               </>
             }
           >
-            Какое имя пользователя вы хотели бы получить?
+            Наишите ваш игровой ник
           </StringPrompt>
         ));
 

@@ -1,5 +1,5 @@
 import React from "react";
-import { CommandButton } from "./components/CommandButton";
+import { CommandButton } from "./components/commandButton";
 import { Spinner } from './components/AnimatedIcons';
 import styled from 'styled-components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';

@@ -169,7 +169,6 @@ namespace BlockArena
             {
                 endpoints.MapHub<GameHub>("/gameHub", options =>
                 {
-                    // Разрешаем WebSocket и LongPolling как fallback
                     options.Transports = HttpTransportType.WebSockets | HttpTransportType.LongPolling;
                 });
 

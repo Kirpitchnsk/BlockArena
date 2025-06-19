@@ -1,4 +1,4 @@
-import { randomIdGenerator } from "../randomIdGenerator";
+import { IdGenerator } from "../IdGenerator";
 import { useSessionStorageState } from "./useSessionStorageState";
 import { useLifeCycle } from "./useLifeCycle";
 
@@ -7,7 +7,7 @@ export const useUserId = (defaultUserIdGenerator) => {
 
     useLifeCycle({
         onMount: () => {
-            const userIdGenerator = defaultUserIdGenerator || randomIdGenerator;
+            const userIdGenerator = defaultUserIdGenerator || IdGenerator;
             !userId && setUserId(userIdGenerator());
         }
     });
